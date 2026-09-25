@@ -1,0 +1,14 @@
+.venv
+__pycache__/
+*.pyc
+.env
+.DS_Store
+
+# User uploaded documents and generated vector indices
+backend/documents/*
+!backend/documents/.gitkeep
+backend/storage/*/
+backend/storage/*.pkl
+backend/storage/*.index
+*.pkl
+*.index
