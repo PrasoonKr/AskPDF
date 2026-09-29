@@ -20,7 +20,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
-import { useCreateSessionMutation, useAskQuestionMutation } from '../api/apiSlice';
+import { useCreateSessionMutation } from '../api/apiSlice';
 
 interface Message {
   id: number;
@@ -127,7 +127,8 @@ export default function ChatInterface() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/chat/stream', {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
+      const response = await fetch(`${apiBase}/chat/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,7 +205,13 @@ export default function ChatInterface() {
                 )
               );
             } else if (eventType === 'error') {
-              throw new Error(parsed.error || 'Stream error');
+              const errMsg = parsed.error || 'An error occurred during response generation.';
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMsgId ? { ...msg, content: `⚠️ ${errMsg}` } : msg
+                )
+              );
+              break;
             }
           } catch (e: any) {
             if (e.message && e.message !== 'Unexpected end of JSON input') {

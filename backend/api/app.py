@@ -1,9 +1,24 @@
+import os
+import sys
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
+import torch
+try:
+    torch.set_num_threads(6)
+except Exception:
+    pass
+
 from contextlib import asynccontextmanager
 import asyncio
-from fastapi import FastAPI
+from pathlib import Path
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os
+from fastapi.responses import FileResponse
 
 from backend.api.routers import (
     health,
@@ -16,36 +31,37 @@ from backend.api.routers import (
 
 def _warmup_services():
     """Warmup AI models in background to eliminate cold-start delays."""
-    print("[DocMind Warmup] Preloading AI models into memory...")
+    print("[AskPDF Warmup] Preloading AI models into memory...", flush=True)
     try:
         from backend.embeddings.model import model as emb_model
         emb_model.encode("warmup")
-        print("[DocMind Warmup] Embedding model initialized.")
+        print("[AskPDF Warmup] Embedding model initialized.", flush=True)
     except Exception as e:
-        print(f"[DocMind Warmup] Embedding warmup warning: {e}")
+        print(f"[AskPDF Warmup] Embedding warmup warning: {e}", flush=True)
 
     try:
         from backend.reranking.model import model as rerank_model
         rerank_model.predict([("warmup query", "warmup passage")])
-        print("[DocMind Warmup] Cross-encoder reranker initialized.")
+        print("[AskPDF Warmup] Cross-encoder reranker initialized.", flush=True)
     except Exception as e:
-        print(f"[DocMind Warmup] Reranker warmup warning: {e}")
+        print(f"[AskPDF Warmup] Reranker warmup warning: {e}", flush=True)
 
     try:
         from backend.llm.client import OllamaClient
         client = OllamaClient()
         client.warmup()
-        print("[DocMind Warmup] Ollama LLM loaded and pinned in RAM (zero cold starts).")
+        print("[AskPDF Warmup] Ollama LLM loaded and pinned in RAM (zero cold starts).", flush=True)
     except Exception as e:
-        print(f"[DocMind Warmup] Ollama warmup warning: {e}")
+        print(f"[AskPDF Warmup] Ollama warmup warning: {e}", flush=True)
 
-    print("[DocMind Warmup] All models ready for instant response!")
+    print("[AskPDF Warmup] All models ready for instant response!", flush=True)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Block startup until all models are loaded — prevents cold-start on first query
     loop = asyncio.get_running_loop()
-    loop.run_in_executor(None, _warmup_services)
+    await loop.run_in_executor(None, _warmup_services)
     yield
 
 
@@ -72,12 +88,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(health.router)
-app.include_router(sessions.router)
-app.include_router(chat.router)
-app.include_router(documents.router)
-app.include_router(auth.router)
+# All API routes under /api prefix
+api_router = APIRouter(prefix="/api")
+api_router.include_router(health.router)
+api_router.include_router(sessions.router)
+api_router.include_router(chat.router)
+api_router.include_router(documents.router)
+api_router.include_router(auth.router)
+app.include_router(api_router)
 
-# Mount frontend if it exists
-if os.path.exists("frontend"):
-    app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+# Serve React frontend from build output
+_frontend_dist = Path("frontend/dist")
+if _frontend_dist.exists():
+    # Serve static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=_frontend_dist / "assets"), name="static-assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """Catch-all: serve index.html for any non-API route (SPA client-side routing)."""
+        file_path = _frontend_dist / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(_frontend_dist / "index.html")
