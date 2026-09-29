@@ -26,7 +26,8 @@ from backend.retrieval.keyword_search import KeywordSearch
 from backend.retrieval.hybrid_search import HybridSearch
 from backend.embeddings.service import EmbeddingService
 from backend.retrieval.document_store import DocumentStore
-from backend.ingestion.pipeline import IngestionPipeline
+
+from backend.adaptive.pipeline import AdaptiveRAGPipeline
 
 
 def startup(user_email: str = "default") -> Application:
@@ -72,6 +73,7 @@ def startup(user_email: str = "default") -> Application:
     retrieval_pipeline = RetrievalPipeline(hybrid_search, reranker, query_rewriter)
     context_builder = ContextBuilder()
 
+    from backend.ingestion.pipeline import IngestionPipeline
     ingestion_pipeline = IngestionPipeline(
         embedding_service, document_store, keyword_search
     )
@@ -88,6 +90,12 @@ def startup(user_email: str = "default") -> Application:
         document_store.save()
         print("Knowledge Base saved.")
 
+    adaptive_pipeline = AdaptiveRAGPipeline(
+        retrieval_pipeline=retrieval_pipeline,
+        llm_service=llm_service,
+        max_retries=2,
+    )
+
     assistant_service = ResearchAssistantService(
         retrieval_pipeline=retrieval_pipeline,
         context_builder=context_builder,
@@ -95,6 +103,7 @@ def startup(user_email: str = "default") -> Application:
         conversation_formatter=conversation_formatter,
         session_service=session_service,
         trace_formatter=trace_formatter,
+        adaptive_pipeline=adaptive_pipeline,
     )
 
     ingestion_service = IngestionService(

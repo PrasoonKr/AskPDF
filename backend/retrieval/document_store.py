@@ -1,5 +1,16 @@
+import os
+# NOTE: OMP/MKL/OPENBLAS thread limits removed — they were crippling CrossEncoder reranking
+# FAISS search is already fast single-threaded; the CrossEncoder needs multi-threaded BLAS
+
+
 import faiss
 import pickle
+import sys
+import pathlib
+
+# Ensure cross-Python version pickle compatibility (Python 3.13 serializes pathlib as pathlib._local)
+if "pathlib._local" not in sys.modules:
+    sys.modules["pathlib._local"] = pathlib
 
 from typing import List
 import numpy as np

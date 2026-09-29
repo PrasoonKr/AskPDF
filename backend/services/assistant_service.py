@@ -12,28 +12,15 @@ class ResearchAssistantService:
         conversation_formatter,
         session_service,
         trace_formatter=None,
+        adaptive_pipeline=None,
     ):
-        self.retrieval_pipeline = (
-            retrieval_pipeline
-        )
-
-        self.context_builder = (
-            context_builder
-        )
-
-        self.answer_generator = (
-            answer_generator
-        )
-
-        self.conversation_formatter = (
-            conversation_formatter
-        )
-
-        self.session_service = (
-            session_service
-        )
-
+        self.retrieval_pipeline = retrieval_pipeline
+        self.context_builder = context_builder
+        self.answer_generator = answer_generator
+        self.conversation_formatter = conversation_formatter
+        self.session_service = session_service
         self.trace_formatter = trace_formatter
+        self.adaptive_pipeline = adaptive_pipeline
 
     def create_session(self) -> str:
 
@@ -54,13 +41,22 @@ class ResearchAssistantService:
         summary = memory.get_summary()
         rewrite_history = memory.get_recent_turns(limit=ConversationConfig.GENERATION_HISTORY_TURNS)
         
-        results, trace = self.retrieval_pipeline.search(
-            query=question,
-            recent_turns=rewrite_history,
-            summary=summary
-        )
-        
-        context = self.context_builder.build(results)
+        trace = None
+        if self.adaptive_pipeline:
+            adaptive_result = self.adaptive_pipeline.execute(
+                query=question,
+                recent_turns=rewrite_history,
+                summary=summary,
+            )
+            context = adaptive_result.context_text
+            results = adaptive_result.documents
+        else:
+            results, trace = self.retrieval_pipeline.search(
+                query=question,
+                recent_turns=rewrite_history,
+                summary=summary
+            )
+            context = self.context_builder.build(results)
         
         generation_history = memory.get_recent_turns(limit=ConversationConfig.GENERATION_HISTORY_TURNS)
         formatted_conversation = self.conversation_formatter.format(generation_history)
@@ -79,36 +75,54 @@ class ResearchAssistantService:
         sources = []
         seen = set()
         for index, result in enumerate(results, start=1):
-            filename = result.document.source.filename
-            stem = filename.replace('.pdf', '')
-            doc_marker = f"[Document {index}]"
-            
-            # Check if LLM cited it by Document marker, or filename
-            if doc_marker in answer or filename in answer or stem in answer:
-                key = (filename, result.document.page)
-                if key not in seen:
-                    seen.add(key)
-                    sources.append(
-                        SourceResponse(
-                            source=filename,
-                            page=result.document.page,
-                            score=result.score
+            if isinstance(result, dict):
+                src_label = result.get("source", "Web Search")
+                if src_label not in seen:
+                    seen.add(src_label)
+                    sources.append(SourceResponse(source=src_label, page=1, score=1.0))
+            else:
+                doc_obj = getattr(result, "document", result)
+                filename = getattr(getattr(doc_obj, "source", None), "filename", "Document")
+                page = getattr(doc_obj, "page", 1)
+                score = getattr(result, "score", 1.0)
+                stem = filename.replace('.pdf', '')
+                doc_marker = f"[Document {index}]"
+                
+                if doc_marker in answer or filename in answer or stem in answer:
+                    key = (filename, page)
+                    if key not in seen:
+                        seen.add(key)
+                        sources.append(
+                            SourceResponse(
+                                source=filename,
+                                page=page,
+                                score=round(score, 3)
+                            )
                         )
-                    )
                     
-        # Fallback: if the LLM didn't explicitly format a citation, just list all the highly-relevant context we passed it
+        # Fallback: if the LLM didn't explicitly format a citation, list all retrieved context
         if not sources:
             for result in results:
-                key = (result.document.source.filename, result.document.page)
-                if key not in seen:
-                    seen.add(key)
-                    sources.append(
-                        SourceResponse(
-                            source=result.document.source.filename,
-                            page=result.document.page,
-                            score=result.score
+                if isinstance(result, dict):
+                    src_label = result.get("source", "Web Search")
+                    if src_label not in seen:
+                        seen.add(src_label)
+                        sources.append(SourceResponse(source=src_label, page=1, score=1.0))
+                else:
+                    doc_obj = getattr(result, "document", result)
+                    filename = getattr(getattr(doc_obj, "source", None), "filename", "Document")
+                    page = getattr(doc_obj, "page", 1)
+                    score = getattr(result, "score", 1.0)
+                    key = (filename, page)
+                    if key not in seen:
+                        seen.add(key)
+                        sources.append(
+                            SourceResponse(
+                                source=filename,
+                                page=page,
+                                score=round(score, 3)
+                            )
                         )
-                    )
 
         # Clean citations from the text so they don't double up with the UI chips
         cleaned_answer = re.sub(r'\[[^\]]*(?:Page|page|PDF|pdf)\s*\d*[^\]]*\]', '', answer, flags=re.IGNORECASE)
@@ -117,16 +131,19 @@ class ResearchAssistantService:
         cleaned_answer = re.sub(r'\[Document\s*\d+\]', '', cleaned_answer, flags=re.IGNORECASE)
         
         for result in results:
-            filename = result.document.source.filename
-            stem = filename.replace('.pdf', '')
-            cleaned_answer = cleaned_answer.replace(f"[{filename}]", "").replace(f"[{stem}]", "")
+            if not isinstance(result, dict):
+                doc_obj = getattr(result, "document", result)
+                filename = getattr(getattr(doc_obj, "source", None), "filename", "")
+                if filename:
+                    stem = filename.replace('.pdf', '')
+                    cleaned_answer = cleaned_answer.replace(f"[{filename}]", "").replace(f"[{stem}]", "")
             
         if cancel_flag and cancel_flag.get("is_cancelled"):
             return ChatResponse(answer="Generation stopped.", sources=[], trace=None)
             
         memory.add_turn(user=question, assistant=cleaned_answer)
         
-        trace_str = self.trace_formatter.format(trace) if self.trace_formatter else None
+        trace_str = self.trace_formatter.format(trace) if (trace and self.trace_formatter) else None
         
         return ChatResponse(
             answer=cleaned_answer,
@@ -142,28 +159,51 @@ class ResearchAssistantService:
         summary = memory.get_summary()
         rewrite_history = memory.get_recent_turns(limit=ConversationConfig.GENERATION_HISTORY_TURNS)
 
-        results, trace = self.retrieval_pipeline.search(
-            query=question,
-            recent_turns=rewrite_history,
-            summary=summary
-        )
+        if self.adaptive_pipeline:
+            adaptive_result = self.adaptive_pipeline.execute(
+                query=question,
+                recent_turns=rewrite_history,
+                summary=summary,
+            )
+            context = adaptive_result.context_text
+            results = adaptive_result.documents
+        else:
+            results, trace = self.retrieval_pipeline.search(
+                query=question,
+                recent_turns=rewrite_history,
+                summary=summary
+            )
+            context = self.context_builder.build(results)
 
         sources = []
         seen = set()
         for result in results:
-            key = (result.document.source.filename, result.document.page)
-            if key not in seen:
-                seen.add(key)
-                sources.append({
-                    "source": result.document.source.filename,
-                    "page": result.document.page,
-                    "score": round(result.score, 3)
-                })
+            if isinstance(result, dict):
+                src_label = result.get("source", "Web Search")
+                if src_label not in seen:
+                    seen.add(src_label)
+                    sources.append({
+                        "source": src_label,
+                        "page": 1,
+                        "score": 1.0
+                    })
+            else:
+                doc_obj = getattr(result, "document", result)
+                filename = getattr(getattr(doc_obj, "source", None), "filename", "Document")
+                page = getattr(doc_obj, "page", 1)
+                score = getattr(result, "score", 1.0)
+                key = (filename, page)
+                if key not in seen:
+                    seen.add(key)
+                    sources.append({
+                        "source": filename,
+                        "page": page,
+                        "score": round(score, 3)
+                    })
 
         # Send retrieved sources metadata immediately so the UI can render source badges
         yield f"event: sources\ndata: {json.dumps(sources)}\n\n"
 
-        context = self.context_builder.build(results)
         generation_history = memory.get_recent_turns(limit=ConversationConfig.GENERATION_HISTORY_TURNS)
         formatted_conversation = self.conversation_formatter.format(generation_history)
 
@@ -187,9 +227,12 @@ class ResearchAssistantService:
         cleaned_answer = re.sub(r'\[\d+\]', '', cleaned_answer)
         cleaned_answer = re.sub(r'\[Document\s*\d+\]', '', cleaned_answer, flags=re.IGNORECASE)
         for result in results:
-            filename = result.document.source.filename
-            stem = filename.replace('.pdf', '')
-            cleaned_answer = cleaned_answer.replace(f"[{filename}]", "").replace(f"[{stem}]", "")
+            if not isinstance(result, dict):
+                doc_obj = getattr(result, "document", result)
+                filename = getattr(getattr(doc_obj, "source", None), "filename", "")
+                if filename:
+                    stem = filename.replace('.pdf', '')
+                    cleaned_answer = cleaned_answer.replace(f"[{filename}]", "").replace(f"[{stem}]", "")
 
         memory.add_turn(user=question, assistant=cleaned_answer)
         yield f"event: done\ndata: {json.dumps({'answer': cleaned_answer})}\n\n"

@@ -55,7 +55,7 @@ class IngestionPipeline:
         if self.keyword_search is not None:
             self.keyword_search.build_index()
 
-        print(f"✓ Indexed {result.chunks} chunks")
+        print(f"[Ingestion] Indexed {result.chunks} chunks")
 
         return result
 

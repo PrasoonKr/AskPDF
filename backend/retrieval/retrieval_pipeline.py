@@ -88,16 +88,18 @@ class RetrievalPipeline:
 
             trace.reranked_results = results
 
+            # Filter out completely off-topic noise (scores < 0.001) while preserving valid general/summary queries
+            rerank_threshold = getattr(RetrievalConfig, "RERANK_THRESHOLD", 0.001)
+            results = [
+                r for r in results
+                if r.score >= rerank_threshold
+            ]
+
         else:
 
             results = results[
                 :RetrievalConfig.RERANK_TOP_K
             ]
-
-        results = [
-            r for r in results
-            if r.score >= RetrievalConfig.SIMILARITY_THRESHOLD
-        ]
 
         trace.final_results = results
 
