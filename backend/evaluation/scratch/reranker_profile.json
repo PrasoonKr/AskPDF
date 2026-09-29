@@ -1,0 +1,41 @@
+{
+  "device": "CPU (4 threads)",
+  "model": "BAAI/bge-reranker-base",
+  "cold_start": {
+    "model_load_ms": 23005.40199992247,
+    "cold_inference_ms": 1089.8673001211137
+  },
+  "warm_single_pair_breakdown": {
+    "tokenization_ms": 2.411859994754195,
+    "forward_pass_ms": 410.1626600138843,
+    "postprocessing_ms": 0.032980041578412056,
+    "total_ms": 412.6075000502169
+  },
+  "candidate_scaling": {
+    "1": {
+      "total_ms": 549.3184667235861,
+      "per_pair_ms": 549.3184667235861
+    },
+    "3": {
+      "total_ms": 1205.7718332701672,
+      "per_pair_ms": 401.92394442338906
+    },
+    "5": {
+      "total_ms": 2063.947733336439,
+      "per_pair_ms": 412.78954666728777
+    },
+    "6": {
+      "total_ms": 2990.7377001363784,
+      "per_pair_ms": 498.45628335606307
+    },
+    "8": {
+      "total_ms": 1843.8723333335172,
+      "per_pair_ms": 230.48404166668965
+    }
+  },
+  "sequence_length_sensitivity": {
+    "512": 1118.6944000267733,
+    "256": 1187.0297000277787,
+    "128": 1213.9143000046413
+  }
+}

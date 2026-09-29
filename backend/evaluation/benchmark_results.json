@@ -1,0 +1,184 @@
+{
+  "total_questions": 50,
+  "timestamp": "2026-09-25T20:32:55Z",
+  "results": {
+    "Dense (FAISS)": {
+      "recall_1": 0.18,
+      "recall_5": 0.34,
+      "mrr": 0.23207936507936508,
+      "avg_latency_ms": 105.68526198621839
+    },
+    "BM25 (Sparse)": {
+      "recall_1": 0.18,
+      "recall_5": 0.34,
+      "mrr": 0.22285714285714284,
+      "avg_latency_ms": 5.547378016635776
+    },
+    "Dense + BM25 (Naive)": {
+      "recall_1": 0.18,
+      "recall_5": 0.38,
+      "mrr": 0.2631904761904762,
+      "avg_latency_ms": 111.26157400198281
+    },
+    "+ RRF (Reciprocal Rank Fusion)": {
+      "recall_1": 0.22,
+      "recall_5": 0.36,
+      "mrr": 0.2847142857142857,
+      "avg_latency_ms": 111.2912560114637
+    },
+    "+ Cross-Encoder Re-ranker": {
+      "recall_1": 0.24,
+      "recall_5": 0.38,
+      "mrr": 0.289,
+      "avg_latency_ms": 6975.876218010671
+    }
+  },
+  "stratified_by_query_type": {
+    "comparison": {
+      "count": 8,
+      "strategies": {
+        "Dense (FAISS)": {
+          "recall_5": 0.375,
+          "mrr": 0.2261904761904762
+        },
+        "BM25 (Sparse)": {
+          "recall_5": 0.25,
+          "mrr": 0.25
+        },
+        "+ RRF (Reciprocal Rank Fusion)": {
+          "recall_5": 0.375,
+          "mrr": 0.3125
+        },
+        "+ Cross-Encoder Re-ranker": {
+          "recall_5": 0.5,
+          "mrr": 0.25416666666666665
+        }
+      }
+    },
+    "conceptual": {
+      "count": 11,
+      "strategies": {
+        "Dense (FAISS)": {
+          "recall_5": 0.18181818181818182,
+          "mrr": 0.18181818181818182
+        },
+        "BM25 (Sparse)": {
+          "recall_5": 0.2727272727272727,
+          "mrr": 0.07965367965367966
+        },
+        "+ RRF (Reciprocal Rank Fusion)": {
+          "recall_5": 0.2727272727272727,
+          "mrr": 0.16753246753246753
+        },
+        "+ Cross-Encoder Re-ranker": {
+          "recall_5": 0.2727272727272727,
+          "mrr": 0.1515151515151515
+        }
+      }
+    },
+    "keyword-heavy": {
+      "count": 11,
+      "strategies": {
+        "Dense (FAISS)": {
+          "recall_5": 0.5454545454545454,
+          "mrr": 0.4151515151515151
+        },
+        "BM25 (Sparse)": {
+          "recall_5": 0.6363636363636364,
+          "mrr": 0.4424242424242424
+        },
+        "+ RRF (Reciprocal Rank Fusion)": {
+          "recall_5": 0.6363636363636364,
+          "mrr": 0.4772727272727273
+        },
+        "+ Cross-Encoder Re-ranker": {
+          "recall_5": 0.6363636363636364,
+          "mrr": 0.5681818181818182
+        }
+      }
+    },
+    "multi-hop": {
+      "count": 10,
+      "strategies": {
+        "Dense (FAISS)": {
+          "recall_5": 0.6,
+          "mrr": 0.31166666666666665
+        },
+        "BM25 (Sparse)": {
+          "recall_5": 0.5,
+          "mrr": 0.33999999999999997
+        },
+        "+ RRF (Reciprocal Rank Fusion)": {
+          "recall_5": 0.5,
+          "mrr": 0.4642857142857143
+        },
+        "+ Cross-Encoder Re-ranker": {
+          "recall_5": 0.5,
+          "mrr": 0.45
+        }
+      }
+    },
+    "numerical / formula": {
+      "count": 10,
+      "strategies": {
+        "Dense (FAISS)": {
+          "recall_5": 0.0,
+          "mrr": 0.01111111111111111
+        },
+        "BM25 (Sparse)": {
+          "recall_5": 0.0,
+          "mrr": 0.0
+        },
+        "+ RRF (Reciprocal Rank Fusion)": {
+          "recall_5": 0.0,
+          "mrr": 0.0
+        },
+        "+ Cross-Encoder Re-ranker": {
+          "recall_5": 0.0,
+          "mrr": 0.0
+        }
+      }
+    }
+  },
+  "reranker_profile": {
+    "device": "CPU (4 threads)",
+    "model": "BAAI/bge-reranker-base",
+    "cold_start": {
+      "model_load_ms": 23005.40199992247,
+      "cold_inference_ms": 1089.8673001211137
+    },
+    "warm_single_pair_breakdown": {
+      "tokenization_ms": 2.411859994754195,
+      "forward_pass_ms": 410.1626600138843,
+      "postprocessing_ms": 0.032980041578412056,
+      "total_ms": 412.6075000502169
+    },
+    "candidate_scaling": {
+      "1": {
+        "total_ms": 549.3184667235861,
+        "per_pair_ms": 549.3184667235861
+      },
+      "3": {
+        "total_ms": 1205.7718332701672,
+        "per_pair_ms": 401.92394442338906
+      },
+      "5": {
+        "total_ms": 2063.947733336439,
+        "per_pair_ms": 412.78954666728777
+      },
+      "6": {
+        "total_ms": 2990.7377001363784,
+        "per_pair_ms": 498.45628335606307
+      },
+      "8": {
+        "total_ms": 1843.8723333335172,
+        "per_pair_ms": 230.48404166668965
+      }
+    },
+    "sequence_length_sensitivity": {
+      "512": 1118.6944000267733,
+      "256": 1187.0297000277787,
+      "128": 1213.9143000046413
+    }
+  }
+}

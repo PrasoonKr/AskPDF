@@ -1,10 +1,402 @@
 [
-    {
-        "question": "What is React?",
-        "expected_source": "React questions.pdf"
-    },
-    {
-        "question": "What is System Design?",
-        "expected_source": "sample.pdf"
-    }
+  {
+    "id": 1,
+    "question": "What is horizontal scaling versus vertical scaling in system design?",
+    "expected_answer": "Horizontal scaling involves adding more machines or nodes to a pool, while vertical scaling adds more power (CPU, RAM, storage) to an existing machine.",
+    "expected_source": "system design.pdf",
+    "expected_page": 7,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 2,
+    "question": "What is database sharding and how does it help scale databases?",
+    "expected_answer": "Sharding is a type of horizontal partitioning where database rows are split across multiple database instances or servers.",
+    "expected_source": "system design.pdf",
+    "expected_page": 10,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 3,
+    "question": "What is the difference between sharding and partitioning?",
+    "expected_answer": "Partitioning divides a database into distinct independent parts on the same machine, whereas sharding distributes those partitions across multiple separate server instances.",
+    "expected_source": "system design.pdf",
+    "expected_page": 13,
+    "query_type": "comparison"
+  },
+  {
+    "id": 4,
+    "question": "How do write-through and write-back caching policies work?",
+    "expected_answer": "In write-through caching, data is simultaneously written to the cache and the primary database. In write-back (write-behind), data is written only to the cache first and asynchronously flushed to the database.",
+    "expected_source": "system design.pdf",
+    "expected_page": 16,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 5,
+    "question": "What is the role of a load balancer in distributed systems?",
+    "expected_answer": "A load balancer distributes incoming network traffic across multiple backend servers to prevent any single server from becoming overwhelmed and ensure high availability.",
+    "expected_source": "system design.pdf",
+    "expected_page": 19,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 6,
+    "question": "What are the core functional requirements for designing a URL shortener like TinyURL?",
+    "expected_answer": "Given a long URL, generate a shorter unique alias; given a short URL, redirect users to the original URL; optionally support custom aliases and expiration.",
+    "expected_source": "system design.pdf",
+    "expected_page": 21,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 7,
+    "question": "How do you design a timeline or newsfeed service like Twitter?",
+    "expected_answer": "Using fan-out on write (push model for normal users) or fan-out on read (pull model for celebrities/high-follower users) with Redis in-memory caches.",
+    "expected_source": "system design.pdf",
+    "expected_page": 24,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 8,
+    "question": "How does a search autocomplete or typeahead suggestion system work?",
+    "expected_answer": "Uses a Trie (prefix tree) data structure combined with frequency counts and in-memory caching to quickly return top suggestions as the user types.",
+    "expected_source": "system design.pdf",
+    "expected_page": 27,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 9,
+    "question": "What are the key components of a web crawler architecture?",
+    "expected_answer": "URL Frontier, HTML Downloader, DNS Resolver, Content Parser, Duplicate Content Eliminator, and URL Extractor.",
+    "expected_source": "system design.pdf",
+    "expected_page": 30,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 10,
+    "question": "What is consistent hashing and why is it used?",
+    "expected_answer": "Consistent hashing minimizes key redistribution when servers are added or removed from a cache or database cluster by mapping both servers and keys to a circular ring.",
+    "expected_source": "system design.pdf",
+    "expected_page": 14,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 11,
+    "question": "What is the CAP theorem in distributed systems?",
+    "expected_answer": "CAP theorem states that a distributed system can only guarantee at most two out of three properties: Consistency, Availability, and Partition Tolerance.",
+    "expected_source": "system design.pdf",
+    "expected_page": 8,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 12,
+    "question": "What is a Content Delivery Network (CDN) and when should it be used?",
+    "expected_answer": "A CDN is a geographically distributed network of proxy servers that cache static assets close to end users to reduce latency and origin server load.",
+    "expected_source": "system design.pdf",
+    "expected_page": 18,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 13,
+    "question": "What is the difference between SQL and NoSQL databases in system design?",
+    "expected_answer": "SQL databases are relational, structured, and ACID compliant with vertical scalability, while NoSQL databases are non-relational, flexible schema, and horizontally scalable.",
+    "expected_source": "system design.pdf",
+    "expected_page": 9,
+    "query_type": "comparison"
+  },
+  {
+    "id": 14,
+    "question": "What is rate limiting and what algorithms are used to implement it?",
+    "expected_answer": "Rate limiting restricts the number of requests a client can send. Common algorithms include Token Bucket, Leaky Bucket, Fixed Window, and Sliding Window.",
+    "expected_source": "system design.pdf",
+    "expected_page": 17,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 15,
+    "question": "What is database replication and how does master-slave replication work?",
+    "expected_answer": "In master-slave replication, the master node handles write operations while one or more slave replicas handle read traffic and replicate data from master.",
+    "expected_source": "system design.pdf",
+    "expected_page": 11,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 16,
+    "question": "What is an API Gateway and what responsibilities does it handle?",
+    "expected_answer": "An API Gateway is a reverse proxy that sits between clients and microservices, handling routing, authentication, rate limiting, and SSL termination.",
+    "expected_source": "system design.pdf",
+    "expected_page": 20,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 17,
+    "question": "How do message queues like Kafka or RabbitMQ decouple services?",
+    "expected_answer": "Message queues provide asynchronous communication between producers and consumers, enabling buffering, load leveling, and fault tolerance.",
+    "expected_source": "system design.pdf",
+    "expected_page": 15,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 18,
+    "question": "What is database indexing and how do B-trees improve query performance?",
+    "expected_answer": "Indexes create auxiliary data structures (typically B-Trees or B+ Trees) that allow O(log N) searches instead of full table scans.",
+    "expected_source": "system design.pdf",
+    "expected_page": 12,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 19,
+    "question": "What are microservices vs monolithic architectures?",
+    "expected_answer": "Monoliths package all components into a single deployable artifact, whereas microservices split the system into independently deployable, loosely coupled domain services.",
+    "expected_source": "system design.pdf",
+    "expected_page": 5,
+    "query_type": "comparison"
+  },
+  {
+    "id": 20,
+    "question": "How do you design a notification system for millions of users?",
+    "expected_answer": "Using dedicated notification workers, message queues, priority queues, and integration with third-party providers (APNS, FCM, Twilio) with deduplication.",
+    "expected_source": "system design.pdf",
+    "expected_page": 26,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 21,
+    "question": "What is event-driven architecture in distributed systems?",
+    "expected_answer": "A design pattern where state changes trigger events that decoupled consumer services listen and respond to via an event bus or log.",
+    "expected_source": "system design.pdf",
+    "expected_page": 6,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 22,
+    "question": "What is cache invalidation and why is it challenging?",
+    "expected_answer": "Cache invalidation ensures cached entries match primary data; it is hard because of timing, network partitions, and race conditions across distributed nodes.",
+    "expected_source": "system design.pdf",
+    "expected_page": 16,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 23,
+    "question": "How do you design a distributed key-value store?",
+    "expected_answer": "Using consistent hashing for partitioning, quorum consensus (N, R, W) for replication, vector clocks for conflict resolution, and SSTables/LSM-trees for storage.",
+    "expected_source": "system design.pdf",
+    "expected_page": 23,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 24,
+    "question": "What are the trade-offs of strong consistency versus eventual consistency?",
+    "expected_answer": "Strong consistency guarantees immediate accuracy across all reads at the cost of latency and availability; eventual consistency maximizes availability and speed with temporary stale reads.",
+    "expected_source": "system design.pdf",
+    "expected_page": 8,
+    "query_type": "comparison"
+  },
+  {
+    "id": 25,
+    "question": "What is a reverse proxy and how is it different from a forward proxy?",
+    "expected_answer": "A forward proxy represents clients to the internet, while a reverse proxy sits in front of backend servers to intercept client requests for load balancing and caching.",
+    "expected_source": "system design.pdf",
+    "expected_page": 19,
+    "query_type": "comparison"
+  },
+  {
+    "id": 26,
+    "question": "What are the four fundamental forces in nature described in physics?",
+    "expected_answer": "The four fundamental forces are Gravitational force, Electromagnetic force, Strong nuclear force, and Weak nuclear force.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 6,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 27,
+    "question": "What are the seven base SI units and their corresponding physical quantities?",
+    "expected_answer": "Length (metre, m), Mass (kilogram, kg), Time (second, s), Electric current (ampere, A), Thermodynamic temperature (kelvin, K), Amount of substance (mole, mol), and Luminous intensity (candela, cd).",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 17,
+    "query_type": "keyword-heavy"
+  },
+  {
+    "id": 28,
+    "question": "What is the parallax method used for in astronomical distance measurement?",
+    "expected_answer": "The parallax method measures distances of distant stars and planets by observing the shift in apparent position against distant backgrounds from two different vantage points.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 18,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 29,
+    "question": "What is the difference between distance and displacement in rectilinear motion?",
+    "expected_answer": "Distance is the total length of the actual path traversed by an object (scalar), while displacement is the shortest directed vector from initial to final position.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 40,
+    "query_type": "comparison"
+  },
+  {
+    "id": 30,
+    "question": "State the kinematic equations of motion for constant acceleration.",
+    "expected_answer": "v = v0 + at, x = v0*t + 0.5*a*t^2, and v^2 = v0^2 + 2*a*x.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 47,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 31,
+    "question": "What is relative velocity and how is it calculated in one dimension?",
+    "expected_answer": "Relative velocity of object A with respect to B is v_AB = v_A - v_B.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 51,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 32,
+    "question": "What is the triangle law of vector addition?",
+    "expected_answer": "If two vectors are represented both in magnitude and direction by two sides of a triangle taken in the same order, then their resultant is represented by the third closing side taken in reverse order.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 66,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 33,
+    "question": "What is projectile motion and what is the trajectory of a projectile?",
+    "expected_answer": "Projectile motion is the motion of an object projected into the air subjected only to gravity. The path or trajectory is a parabola.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 78,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 34,
+    "question": "What is the formula for the horizontal range of a projectile?",
+    "expected_answer": "R = (v0^2 * sin(2*theta)) / g, with maximum range achieved at an angle of 45 degrees.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 79,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 35,
+    "question": "What is centripetal acceleration and what is its magnitude?",
+    "expected_answer": "Centripetal acceleration is the radial acceleration directed towards the center in uniform circular motion, with magnitude a_c = v^2 / R = omega^2 * R.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 81,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 36,
+    "question": "State Newton's First Law of Motion and define inertia.",
+    "expected_answer": "Every body continues to be in its state of rest or of uniform motion along a straight line unless compelled to change that state by an applied external force. Inertia is the inherent property to resist change in state.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 91,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 37,
+    "question": "State Newton's Second Law of Motion in terms of momentum.",
+    "expected_answer": "The rate of change of momentum of a body is directly proportional to the applied force and takes place in the direction in which the force acts (F = dp/dt = m*a).",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 93,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 38,
+    "question": "What is impulse and what is the impulse-momentum theorem?",
+    "expected_answer": "Impulse is the product of force and the time duration over which it acts (I = F * delta_t), which equals the total change in linear momentum of the body.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 96,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 39,
+    "question": "State Newton's Third Law of Motion and explain action-reaction pairs.",
+    "expected_answer": "To every action, there is always an equal and opposite reaction. Forces always occur in pairs acting on two different bodies simultaneously.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 97,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 40,
+    "question": "State the law of conservation of linear momentum.",
+    "expected_answer": "The total linear momentum of an isolated system of interacting particles remains constant if no net external force acts on the system.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 98,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 41,
+    "question": "What is the difference between static friction, limiting friction, and kinetic friction?",
+    "expected_answer": "Static friction opposes impending motion and self-adjusts up to limiting friction (f_s,max = mu_s * N); once relative motion starts, kinetic friction opposes motion (f_k = mu_k * N), where mu_k < mu_s.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 101,
+    "query_type": "comparison"
+  },
+  {
+    "id": 42,
+    "question": "What is the Work-Energy Theorem in classical mechanics?",
+    "expected_answer": "The change in kinetic energy of a particle is equal to the net work done on it by all forces (Kf - Ki = W_net).",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 116,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 43,
+    "question": "What is a conservative force and give examples?",
+    "expected_answer": "A force is conservative if the work done by or against it in moving a body depends only on the initial and final positions, not on the path taken. Examples: gravitational force, spring force.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 121,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 44,
+    "question": "What is the difference between elastic and inelastic collisions?",
+    "expected_answer": "In an elastic collision, both total momentum and total kinetic energy are conserved. In an inelastic collision, total momentum is conserved but kinetic energy is not conserved.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 129,
+    "query_type": "comparison"
+  },
+  {
+    "id": 45,
+    "question": "Define the center of mass of a system of particles.",
+    "expected_answer": "The center of mass is the point where the entire mass of a system may be considered to be concentrated and where all external forces can be considered to act.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 144,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 46,
+    "question": "What is torque (moment of a force) and what is its mathematical expression?",
+    "expected_answer": "Torque measures the rotational effectiveness of a force and is defined as the cross product tau = r x F, with magnitude r * F * sin(theta).",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 154,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 47,
+    "question": "What is the moment of inertia and how is it analogous to mass in linear motion?",
+    "expected_answer": "Moment of inertia (I = sum(m_i * r_i^2)) measures a body's rotational inertia or resistance to rotational acceleration, serving the same role as mass in F = ma (tau = I * alpha).",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 163,
+    "query_type": "conceptual"
+  },
+  {
+    "id": 48,
+    "question": "State Kepler's Three Laws of Planetary Motion.",
+    "expected_answer": "1. Law of Orbits: Planets move in elliptical orbits with the Sun at one focus. 2. Law of Areas: The line joining planet and Sun sweeps out equal areas in equal time intervals. 3. Law of Periods: T^2 is proportional to a^3.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 184,
+    "query_type": "multi-hop"
+  },
+  {
+    "id": 49,
+    "question": "State Newton's Universal Law of Gravitation.",
+    "expected_answer": "Every body in the universe attracts every other body with a force directly proportional to the product of their masses and inversely proportional to the square of the distance between them (F = G * m1 * m2 / r^2).",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 185,
+    "query_type": "numerical / formula"
+  },
+  {
+    "id": 50,
+    "question": "What is escape velocity from Earth and what is its formula and value?",
+    "expected_answer": "Escape velocity is the minimum speed an object must have to escape Earth's gravitational pull: v_e = sqrt(2*G*M_E / R_E) = sqrt(2*g*R_E), approximately 11.2 km/s.",
+    "expected_source": "NCERT-Class-11-Physics-Part-1.pdf",
+    "expected_page": 193,
+    "query_type": "numerical / formula"
+  }
 ]

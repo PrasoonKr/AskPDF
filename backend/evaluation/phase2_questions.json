@@ -1,0 +1,482 @@
+[
+  {
+    "id": 1,
+    "category": "simple_factual",
+    "question": "What is normalization in DBMS?",
+    "expected_answer": "Normalization is the process of organizing data to eliminate redundancy through decomposition into normal forms.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["normalization", "redundancy", "decomposition", "normal forms"]
+  },
+  {
+    "id": 2,
+    "category": "simple_factual",
+    "question": "Explain First Normal Form 1NF in relational databases.",
+    "expected_answer": "1NF requires each attribute of a relation to contain only atomic (indivisible) values, prohibiting multivalued or composite attributes.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["1NF", "atomic", "first normal form", "multivalued"]
+  },
+  {
+    "id": 3,
+    "category": "simple_factual",
+    "question": "What is Boyce-Codd Normal Form BCNF?",
+    "expected_answer": "A relation is in BCNF if for every functional dependency X -> Y, X is a super key of the relation.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["BCNF", "Boyce-Codd", "super key", "functional dependency"]
+  },
+  {
+    "id": 4,
+    "category": "simple_factual",
+    "question": "What are Armstrong's Axioms in functional dependency inference?",
+    "expected_answer": "Armstrong's Axioms consist of Reflexivity, Augmentation, and Transitivity rules used to infer all functional dependencies.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["Armstrong", "axioms", "reflexivity", "augmentation", "transitivity"]
+  },
+  {
+    "id": 5,
+    "category": "simple_factual",
+    "question": "What is a Primary Key in relational database management systems?",
+    "expected_answer": "A primary key is a minimal super key that uniquely identifies each tuple in a relation without null values.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["primary key", "uniquely", "tuple", "null"]
+  },
+  {
+    "id": 6,
+    "category": "simple_factual",
+    "question": "What is a Foreign Key constraint in DBMS?",
+    "expected_answer": "A foreign key is an attribute in one table that references the primary key of another table to maintain referential integrity.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["foreign key", "referential integrity", "references", "primary key"]
+  },
+  {
+    "id": 7,
+    "category": "simple_factual",
+    "question": "What are the ACID properties in database transactions?",
+    "expected_answer": "ACID stands for Atomicity, Consistency, Isolation, and Durability, ensuring reliable execution of concurrent database transactions.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["ACID", "atomicity", "consistency", "isolation", "durability"]
+  },
+  {
+    "id": 8,
+    "category": "simple_factual",
+    "question": "What is two-phase locking 2PL protocol?",
+    "expected_answer": "2PL is a concurrency control protocol with a growing phase where locks are acquired and a shrinking phase where locks are released.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["two-phase locking", "2PL", "growing phase", "shrinking phase"]
+  },
+  {
+    "id": 9,
+    "category": "simple_factual",
+    "question": "What is a deadlock in database transaction processing?",
+    "expected_answer": "A deadlock occurs when two or more transactions are in a simultaneous wait state because each holds a lock on a resource the other needs.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["deadlock", "wait state", "lock", "transactions"]
+  },
+  {
+    "id": 10,
+    "category": "simple_factual",
+    "question": "What is an index in DBMS?",
+    "expected_answer": "An index is an auxiliary data structure, often a B+ tree, that speeds up data retrieval operations without scanning all rows.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["index", "B+ tree", "retrieval", "data structure"]
+  },
+  {
+    "id": 11,
+    "category": "simple_factual",
+    "question": "What is database horizontal scaling in system design?",
+    "expected_answer": "Horizontal scaling involves adding more computing machines to a network to distribute traffic and workload across server instances.",
+    "expected_source": "system design.pdf",
+    "keywords": ["horizontal scaling", "more machines", "instances", "distribute"]
+  },
+  {
+    "id": 12,
+    "category": "simple_factual",
+    "question": "What is vertical scaling in system design?",
+    "expected_answer": "Vertical scaling upgrades the compute capacity (RAM, CPU, disk) of a single server machine.",
+    "expected_source": "system design.pdf",
+    "keywords": ["vertical scaling", "single machine", "RAM", "CPU"]
+  },
+  {
+    "id": 13,
+    "category": "simple_factual",
+    "question": "What is database sharding in distributed architecture?",
+    "expected_answer": "Sharding is a horizontal partitioning technique where a large database dataset is split across separate server instances.",
+    "expected_source": "system design.pdf",
+    "keywords": ["sharding", "horizontal partitioning", "separate servers", "dataset"]
+  },
+  {
+    "id": 14,
+    "category": "simple_factual",
+    "question": "What is the CAP theorem in distributed systems?",
+    "expected_answer": "CAP theorem states that a distributed system can only guarantee at most two of Consistency, Availability, and Partition Tolerance simultaneously.",
+    "expected_source": "system design.pdf",
+    "keywords": ["CAP theorem", "consistency", "availability", "partition tolerance"]
+  },
+  {
+    "id": 15,
+    "category": "simple_factual",
+    "question": "What is write-through caching strategy?",
+    "expected_answer": "In write-through caching, data is simultaneously written to the cache and the primary database before acknowledging success.",
+    "expected_source": "system design.pdf",
+    "keywords": ["write-through", "cache", "primary database", "simultaneously"]
+  },
+  {
+    "id": 16,
+    "category": "simple_factual",
+    "question": "What is write-back or write-behind caching?",
+    "expected_answer": "In write-back caching, writes are confirmed immediately to the cache and asynchronously flushed to the database in batches.",
+    "expected_source": "system design.pdf",
+    "keywords": ["write-back", "write-behind", "asynchronously", "cache"]
+  },
+  {
+    "id": 17,
+    "category": "simple_factual",
+    "question": "What is a reverse proxy in system design?",
+    "expected_answer": "A reverse proxy sits in front of web servers and forwards incoming client requests, providing load balancing, SSL termination, and caching.",
+    "expected_source": "system design.pdf",
+    "keywords": ["reverse proxy", "web servers", "load balancing", "requests"]
+  },
+  {
+    "id": 18,
+    "category": "simple_factual",
+    "question": "What is consistent hashing in distributed systems?",
+    "expected_answer": "Consistent hashing maps both keys and server nodes to a circular hash ring to minimize key remapping when nodes join or leave.",
+    "expected_source": "system design.pdf",
+    "keywords": ["consistent hashing", "hash ring", "remapping", "nodes"]
+  },
+  {
+    "id": 19,
+    "category": "simple_factual",
+    "question": "What is master-slave replication in database architecture?",
+    "expected_answer": "Master-slave replication designates one primary server for write operations and replicates updates to multiple read-only replica servers.",
+    "expected_source": "system design.pdf",
+    "keywords": ["master-slave", "replication", "primary", "read-only"]
+  },
+  {
+    "id": 20,
+    "category": "simple_factual",
+    "question": "What is rate limiting in system design?",
+    "expected_answer": "Rate limiting restricts the number of requests a user or client can make to an API within a given window of time to prevent abuse.",
+    "expected_source": "system design.pdf",
+    "keywords": ["rate limiting", "requests", "API", "window", "abuse"]
+  },
+  {
+    "id": 21,
+    "category": "conceptual",
+    "question": "Why does BCNF prevent update and deletion anomalies that 3NF might still allow?",
+    "expected_answer": "3NF allows functional dependencies X -> Y where Y is a prime attribute even if X is not a super key, leaving room for redundancy that BCNF strictly eliminates.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["BCNF", "3NF", "prime attribute", "anomalies", "super key"]
+  },
+  {
+    "id": 22,
+    "category": "conceptual",
+    "question": "Why is partition tolerance non-negotiable in distributed networks according to the CAP theorem?",
+    "expected_answer": "Network failures, packet drops, and partitions are inevitable across physical cables, so distributed systems must handle partitions and choose between C and A.",
+    "expected_source": "system design.pdf",
+    "keywords": ["partition tolerance", "network", "inevitable", "CAP"]
+  },
+  {
+    "id": 23,
+    "category": "conceptual",
+    "question": "How does consistent hashing prevent cascading server failures during resharding?",
+    "expected_answer": "When a node is added or removed, only k/N keys on adjacent ring segments are redistributed rather than rehashing the entire keyspace.",
+    "expected_source": "system design.pdf",
+    "keywords": ["consistent hashing", "cascading", "resharding", "ring", "redistributed"]
+  },
+  {
+    "id": 24,
+    "category": "conceptual",
+    "question": "How does two-phase locking 2PL guarantee serializability in concurrent transactions?",
+    "expected_answer": "By prohibiting lock acquisition after any lock has been released (shrinking phase), 2PL prevents circular lock dependency graphs.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["2PL", "serializability", "growing", "shrinking", "locks"]
+  },
+  {
+    "id": 25,
+    "category": "conceptual",
+    "question": "Why does denormalization improve read throughput at the expense of write throughput?",
+    "expected_answer": "Denormalization precomputes joins into redundant tables for faster reads, but writes require updating redundant data in multiple locations.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["denormalization", "read throughput", "redundancy", "joins", "writes"]
+  },
+  {
+    "id": 26,
+    "category": "conceptual",
+    "question": "How does B+ tree indexing reduce disk I/O operations compared to linear table scans?",
+    "expected_answer": "B+ trees have high fan-out and keep all data pointers at leaf levels, allowing lookups in O(log N) disk block accesses.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["B+ tree", "fan-out", "disk I/O", "leaf nodes", "lookup"]
+  },
+  {
+    "id": 27,
+    "category": "conceptual",
+    "question": "Why can distributed databases only choose between CP or AP during a network partition?",
+    "expected_answer": "If partitions prevent communication, either servers reject writes to stay consistent (CP) or accept writes on both sides risking divergence (AP).",
+    "expected_source": "system design.pdf",
+    "keywords": ["CP", "AP", "partition", "divergence", "consistent"]
+  },
+  {
+    "id": 28,
+    "category": "conceptual",
+    "question": "How does write-back caching minimize database write latency compared to write-through?",
+    "expected_answer": "Write-back acknowledges the write as soon as it hits memory cache without waiting for synchronous disk I/O on the primary database.",
+    "expected_source": "system design.pdf",
+    "keywords": ["write-back", "latency", "memory", "synchronous disk"]
+  },
+  {
+    "id": 29,
+    "category": "conceptual",
+    "question": "What causes cascading rollback in database transaction crash recovery?",
+    "expected_answer": "Cascading rollback happens when a failed transaction rolls back, forcing all other transactions that read its uncommitted data to roll back as well.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["cascading rollback", "uncommitted", "recovery", "dirty read"]
+  },
+  {
+    "id": 30,
+    "category": "conceptual",
+    "question": "How does load balancing distribute client request traffic across heterogeneous backend servers?",
+    "expected_answer": "Load balancers use algorithms like weighted round-robin, least connections, or IP hash to allocate traffic based on server capacity and health.",
+    "expected_source": "system design.pdf",
+    "keywords": ["load balancing", "round-robin", "least connections", "capacity"]
+  },
+  {
+    "id": 31,
+    "category": "comparative",
+    "question": "How does horizontal scaling compare with vertical scaling in terms of failure resilience and cost?",
+    "expected_answer": "Horizontal scaling provides higher failure resilience through multi-machine redundancy using commodity hardware, whereas vertical scaling is a single point of failure with exponential hardware costs.",
+    "expected_source": "system design.pdf",
+    "keywords": ["horizontal scaling", "vertical scaling", "failure resilience", "commodity hardware", "single point of failure"]
+  },
+  {
+    "id": 32,
+    "category": "comparative",
+    "question": "What is the difference between database sharding and partitioning?",
+    "expected_answer": "Partitioning divides data into subsets within a single database instance, whereas sharding distributes those partitions across multiple autonomous database servers.",
+    "expected_source": "system design.pdf",
+    "keywords": ["sharding", "partitioning", "single instance", "multiple servers"]
+  },
+  {
+    "id": 33,
+    "category": "comparative",
+    "question": "Compare write-through caching versus write-back caching trade-offs.",
+    "expected_answer": "Write-through provides strong consistency and no data loss on cache crash but higher write latency; write-back offers low latency and high write throughput but risks data loss if the cache crashes before flushing.",
+    "expected_source": "system design.pdf",
+    "keywords": ["write-through", "write-back", "latency", "data loss", "throughput"]
+  },
+  {
+    "id": 34,
+    "category": "comparative",
+    "question": "What is the difference between 3NF and BCNF normalization forms?",
+    "expected_answer": "3NF allows a dependency X -> Y if Y is a prime attribute, while BCNF strictly requires X to be a super key for all functional dependencies without exceptions.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["3NF", "BCNF", "prime attribute", "super key", "dependency"]
+  },
+  {
+    "id": 35,
+    "category": "comparative",
+    "question": "How does optimistic concurrency control differ from two-phase locking in DBMS?",
+    "expected_answer": "2PL locks resources ahead of access to prevent conflicts, whereas optimistic concurrency control allows execution without locking and validates for conflicts before commit.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["optimistic concurrency", "2PL", "locking", "validation", "conflicts"]
+  },
+  {
+    "id": 36,
+    "category": "comparative",
+    "question": "Compare relational SQL databases versus NoSQL document stores for schema flexibility.",
+    "expected_answer": "Relational SQL enforces rigid predefined schemas with ACID foreign keys, while NoSQL document stores allow flexible dynamic schemas suitable for hierarchical unstructured data.",
+    "expected_source": "system design.pdf",
+    "keywords": ["SQL", "NoSQL", "schema", "relational", "flexibility"]
+  },
+  {
+    "id": 37,
+    "category": "comparative",
+    "question": "What is the difference between a forward proxy and a reverse proxy?",
+    "expected_answer": "A forward proxy acts on behalf of clients to access external internet services, while a reverse proxy acts on behalf of backend servers to intercept client requests.",
+    "expected_source": "system design.pdf",
+    "keywords": ["forward proxy", "reverse proxy", "clients", "backend servers"]
+  },
+  {
+    "id": 38,
+    "category": "comparative",
+    "question": "Compare strong consistency versus eventual consistency in distributed systems.",
+    "expected_answer": "Strong consistency guarantees all readers see the latest write immediately at the cost of higher latency, whereas eventual consistency permits temporary divergence for higher availability and faster responses.",
+    "expected_source": "system design.pdf",
+    "keywords": ["strong consistency", "eventual consistency", "divergence", "latency", "availability"]
+  },
+  {
+    "id": 39,
+    "category": "comparative",
+    "question": "How does master-slave replication differ from master-master replication?",
+    "expected_answer": "Master-slave directs all writes to a single primary avoiding write conflicts, whereas master-master allows writes on multiple nodes requiring conflict resolution algorithms.",
+    "expected_source": "system design.pdf",
+    "keywords": ["master-slave", "master-master", "primary", "write conflicts", "resolution"]
+  },
+  {
+    "id": 40,
+    "category": "comparative",
+    "question": "Compare clustered index versus non-clustered secondary index in database storage.",
+    "expected_answer": "A clustered index defines the physical order of data rows on disk (one per table), while a non-clustered index stores sorted pointers pointing to table rows.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["clustered index", "non-clustered index", "physical order", "pointers"]
+  },
+  {
+    "id": 41,
+    "category": "multi_hop",
+    "question": "How do database indexing and horizontal sharding work together to scale high-traffic read and write queries?",
+    "expected_answer": "Sharding distributes database partitions across multiple machines by shard key, while local B+ tree indexes on each shard optimize single-node query lookup latency.",
+    "expected_source": "system design.pdf",
+    "keywords": ["sharding", "indexing", "shard key", "B+ tree", "partitions"]
+  },
+  {
+    "id": 42,
+    "category": "multi_hop",
+    "question": "How do ACID isolation levels impact transaction throughput when using two-phase locking?",
+    "expected_answer": "Higher isolation levels like Serializable hold long-duration read and write locks under 2PL, increasing lock contention and reducing concurrent transaction throughput.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["ACID", "isolation", "2PL", "contention", "serializable", "throughput"]
+  },
+  {
+    "id": 43,
+    "category": "multi_hop",
+    "question": "How does CAP theorem consistency trade-off affect cache update strategies in distributed databases?",
+    "expected_answer": "If a system prioritizes availability (AP), it must adopt eventual consistency, pairing asynchronous write-behind caching where replicas may temporarily hold stale data.",
+    "expected_source": "system design.pdf",
+    "keywords": ["CAP theorem", "cache update", "AP", "write-behind", "stale data"]
+  },
+  {
+    "id": 44,
+    "category": "multi_hop",
+    "question": "If a relational database is decomposed into BCNF, what is the impact on join query latency and normalization benefits?",
+    "expected_answer": "BCNF eliminates update anomalies and redundancy, but decomposes large relations into multiple tables, requiring expensive SQL join operations at query time.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["BCNF", "decomposition", "joins", "latency", "redundancy"]
+  },
+  {
+    "id": 45,
+    "category": "multi_hop",
+    "question": "How does consistent hashing interact with master-slave replication to ensure high availability during node failure?",
+    "expected_answer": "Consistent hashing routes a key to a primary node on the hash ring, which replicates writes to the next N consecutive successor nodes for failover redundancy.",
+    "expected_source": "system design.pdf",
+    "keywords": ["consistent hashing", "master-slave", "hash ring", "successor nodes", "failover"]
+  },
+  {
+    "id": 46,
+    "category": "multi_hop",
+    "question": "How do write-behind caching and database replication lag combine to cause stale reads?",
+    "expected_answer": "Write-behind delays flushing updates from cache to primary database, and replication lag delays mirroring from primary to replicas, amplifying stale read windows.",
+    "expected_source": "system design.pdf",
+    "keywords": ["write-behind", "replication lag", "stale reads", "cache", "primary"]
+  },
+  {
+    "id": 47,
+    "category": "multi_hop",
+    "question": "How do foreign key constraints affect horizontal database partitioning across multiple shards?",
+    "expected_answer": "Enforcing foreign key constraints across different shards requires expensive cross-node distributed transactions and two-phase commits, often forcing denormalization.",
+    "expected_source": "system design.pdf",
+    "keywords": ["foreign key", "shards", "distributed transactions", "two-phase commit", "partitioning"]
+  },
+  {
+    "id": 48,
+    "category": "multi_hop",
+    "question": "How does network partition tolerance in CAP theorem influence deadlocks in distributed two-phase locking?",
+    "expected_answer": "Network partitions can split nodes holding distributed 2PL locks, preventing lock release messages and creating undetectable distributed deadlocks.",
+    "expected_source": "system design.pdf",
+    "keywords": ["partition tolerance", "CAP", "deadlocks", "2PL", "distributed"]
+  },
+  {
+    "id": 49,
+    "category": "multi_hop",
+    "question": "How does denormalization reduce join overhead while increasing storage costs in scaled systems?",
+    "expected_answer": "Denormalization embeds related columns into a single relation to eliminate multi-table joins, but duplicates attributes across records, increasing disk consumption.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["denormalization", "join overhead", "storage costs", "redundancy"]
+  },
+  {
+    "id": 50,
+    "category": "multi_hop",
+    "question": "How does reverse proxy load balancing coordinate with rate limiting to prevent service starvation?",
+    "expected_answer": "The reverse proxy inspects incoming IP headers, applies token-bucket rate limiting to throttle abusers, and routes valid requests across healthy backend pools.",
+    "expected_source": "system design.pdf",
+    "keywords": ["reverse proxy", "load balancing", "rate limiting", "token-bucket", "starvation"]
+  },
+  {
+    "id": 51,
+    "category": "ambiguous_conversational",
+    "question": "Can you tell me how it works when machines are added to scale?",
+    "expected_answer": "This refers to horizontal scaling, where additional server nodes are added to a cluster to share request load and memory workload.",
+    "expected_source": "system design.pdf",
+    "keywords": ["horizontal scaling", "machines", "cluster", "nodes"]
+  },
+  {
+    "id": 52,
+    "category": "ambiguous_conversational",
+    "question": "Explain the thing that eliminates redundancy in tables.",
+    "expected_answer": "Normalization decomposes relations into normal forms (1NF, 2NF, 3NF, BCNF) to eliminate redundant data and avoid anomalies.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["normalization", "redundancy", "tables", "normal forms"]
+  },
+  {
+    "id": 53,
+    "category": "ambiguous_conversational",
+    "question": "What happens when two transactions wait on each other forever?",
+    "expected_answer": "This is a deadlock, where two or more transactions hold locks on resources each other requires, creating a circular wait.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["deadlock", "transactions", "wait", "circular wait"]
+  },
+  {
+    "id": 54,
+    "category": "ambiguous_conversational",
+    "question": "How do we make sure data isn't lost if power dies?",
+    "expected_answer": "Durability in ACID guarantees that once a transaction commits, its updates are persistently recorded on non-volatile storage using write-ahead logging.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["durability", "ACID", "power dies", "write-ahead logging"]
+  },
+  {
+    "id": 55,
+    "category": "ambiguous_conversational",
+    "question": "Tell me about the ring where keys are hashed.",
+    "expected_answer": "This refers to consistent hashing, which places servers and keys on a circular hash ring to minimize remapping during node changes.",
+    "expected_source": "system design.pdf",
+    "keywords": ["consistent hashing", "hash ring", "ring", "keys"]
+  },
+  {
+    "id": 56,
+    "category": "ambiguous_conversational",
+    "question": "What's the difference between doing writes everywhere vs one primary?",
+    "expected_answer": "This compares multi-master replication (writes accepted on all nodes) with master-slave replication (writes restricted to a single primary).",
+    "expected_source": "system design.pdf",
+    "keywords": ["master-slave", "multi-master", "primary", "writes"]
+  },
+  {
+    "id": 57,
+    "category": "ambiguous_conversational",
+    "question": "Why should I split tables into smaller pieces?",
+    "expected_answer": "Splitting tables via normalization or partitioning eliminates redundancy, reduces lock contention, and improves I/O cache efficiency.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["normalization", "partitioning", "split tables", "redundancy"]
+  },
+  {
+    "id": 58,
+    "category": "ambiguous_conversational",
+    "question": "What is the rule about picking only 2 out of 3 in distributed systems?",
+    "expected_answer": "The CAP theorem states that a distributed data store can guarantee at most two of Consistency, Availability, and Partition Tolerance.",
+    "expected_source": "system design.pdf",
+    "keywords": ["CAP theorem", "2 out of 3", "consistency", "availability", "partition tolerance"]
+  },
+  {
+    "id": 59,
+    "category": "ambiguous_conversational",
+    "question": "Explain how caching saves the database from crashing.",
+    "expected_answer": "An in-memory cache intercepts high-frequency read queries, drastically reducing disk I/O and query load on the primary database.",
+    "expected_source": "system design.pdf",
+    "keywords": ["caching", "in-memory", "database load", "disk I/O"]
+  },
+  {
+    "id": 60,
+    "category": "ambiguous_conversational",
+    "question": "How do we prevent duplicate rows without having to scan everything?",
+    "expected_answer": "A primary key or unique B+ tree index enforces uniqueness in logarithmic time (O(log N)) without requiring a full table scan.",
+    "expected_source": "DBMS_Full_Notes.pdf",
+    "keywords": ["primary key", "unique index", "B+ tree", "duplicate rows"]
+  }
+]
