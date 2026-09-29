@@ -1,4 +1,4 @@
-# DocMind — Local-First AI Research Assistant
+# AskPDF — Local-First AI Research Assistant
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18-61DAFB.svg?logo=react&logoColor=black)](https://reactjs.org/)
@@ -6,7 +6,7 @@
 [![FAISS](https://img.shields.io/badge/FAISS-Vector_Search-00599C.svg)](https://github.com/facebookresearch/faiss)
 [![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black.svg?logo=ollama)](https://ollama.com)
 
-**DocMind** is an advanced, local-first AI Research Assistant powered by a production-grade **Retrieval-Augmented Generation (RAG)** pipeline. It allows users to upload complex research papers, technical manuals, and PDF documents, creating an isolated knowledge base to answer user queries with grounded citations and zero hallucinations.
+**AskPDF** is an advanced, local-first AI Research Assistant powered by a production-grade **Retrieval-Augmented Generation (RAG)** pipeline. It allows users to upload complex research papers, technical manuals, and PDF documents, creating an isolated knowledge base to answer user queries with grounded citations and zero hallucinations.
 
 ---
 
@@ -168,33 +168,54 @@ npm install
 
 ## Running the Application
 
-### Start Backend API Server
-From the project root:
+### Option A: Production Mode (Single Server)
+Build the frontend and serve everything from FastAPI:
 ```bash
-uvicorn backend.api.app:app --reload
-```
-- API Base URL: `http://localhost:8000`
-- Interactive Swagger Docs: `http://localhost:8000/docs`
-- Health Probe: `http://localhost:8000/health`
+# Build React frontend
+cd frontend && npm run build && cd ..
 
-### Start Frontend Client
-In a separate terminal:
-```bash
-cd frontend
-npm run dev
+# Start the server (serves both API and React UI)
+uvicorn backend.api.app:app --host 0.0.0.0 --port 8000
 ```
-Open `http://localhost:5173` in your browser, sign in with your Google account, and start researching!
+- Application: `http://localhost:8000`
+- API Docs: `http://localhost:8000/docs`
+- Health: `http://localhost:8000/api/health`
+- Readiness: `http://localhost:8000/api/health/ready`
+
+### Option B: Development Mode (Two Servers + Hot Reload)
+```bash
+# Terminal 1: Backend
+uvicorn backend.api.app:app --reload
+
+# Terminal 2: Frontend (Vite proxies /api → localhost:8000)
+cd frontend && npm run dev
+```
+Open `http://localhost:5173` — Vite hot-reloads frontend changes and proxies API calls to the backend.
 
 ---
 
-## Diagnostic Health API
+## API Endpoints
 
-You can inspect the live status of the system at any time by calling `GET /health`:
+All API routes are prefixed with `/api`:
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | System health + config overview |
+| `GET` | `/api/health/ready` | Readiness probe (embedding, reranker, Ollama) |
+| `POST` | `/api/auth/google` | Google OAuth login |
+| `POST` | `/api/auth/dev-login` | Dev/guest login (no Google required) |
+| `POST` | `/api/sessions` | Create chat session |
+| `POST` | `/api/chat/stream` | Streaming RAG chat (SSE) |
+| `GET` | `/api/documents` | List uploaded documents |
+| `POST` | `/api/documents` | Upload PDF(s) |
+| `DELETE` | `/api/documents/{filename}` | Delete a document |
+
+### Health Check (`GET /api/health`)
 
 ```json
 {
   "status": "healthy",
-  "timestamp": "2026-08-06T17:50:00.000000Z",
+  "timestamp": "2026-09-29T14:59:33.000000Z",
   "services": {
     "api": "online",
     "ollama": {
@@ -208,7 +229,22 @@ You can inspect the live status of the system at any time by calling `GET /healt
     "reranker_model": "BAAI/bge-reranker-base",
     "chunk_size": 400,
     "top_k": 10,
-    "rerank_top_k": 5
+    "rerank_top_k": 3
+  }
+}
+```
+
+### Readiness Check (`GET /api/health/ready`)
+
+Returns `200` when all services are loaded, `503` if any are missing:
+```json
+{
+  "ready": true,
+  "timestamp": "2026-09-29T14:59:33.700825Z",
+  "checks": {
+    "embedding_model": "ready",
+    "reranker": "ready",
+    "ollama": "ready"
   }
 }
 ```

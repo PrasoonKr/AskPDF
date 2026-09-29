@@ -1,4 +1,4 @@
-# AI Research Assistant (DocMind) — SDE Interview Q&A Guide
+# AI Research Assistant (AskPDF) — SDE Interview Q&A Guide
 
 This guide contains the most common and challenging technical, architectural, and behavioral interview questions you may face when discussing this project in Software Development Engineer (SDE) and Machine Learning / AI Engineer interviews.
 
@@ -20,9 +20,9 @@ This guide contains the most common and challenging technical, architectural, an
 
 ### Q1: Can you give a 60-second elevator pitch of this project?
 > **Answer:**
-> **DocMind** is a local-first, privacy-focused AI Research Assistant powered by an advanced Retrieval-Augmented Generation (RAG) architecture. It allows users to upload complex research papers and PDFs and converse with them with zero hallucinations. 
+> **AskPDF** is a local-first, privacy-focused AI Research Assistant powered by an advanced Retrieval-Augmented Generation (RAG) architecture. It allows users to upload complex research papers and PDFs and converse with them with zero hallucinations. 
 > 
-> Unlike naive RAG pipelines that only use basic vector search, DocMind implements an advanced **Hybrid Retrieval Pipeline** combining dense semantic search (FAISS) and sparse keyword search (BM25), fused via **Reciprocal Rank Fusion (RRF)**, and refined with a **Cross-Encoder Re-ranker**. The backend is built with FastAPI and local LLM inference via Ollama, while the frontend is built with React, TypeScript, and Redux Toolkit Query, protected by Google OAuth and custom JWT authentication.
+> Unlike naive RAG pipelines that only use basic vector search, AskPDF implements an advanced **Hybrid Retrieval Pipeline** combining dense semantic search (FAISS) and sparse keyword search (BM25), fused via **Reciprocal Rank Fusion (RRF)**, and refined with a **Cross-Encoder Re-ranker**. The backend is built with FastAPI and local LLM inference via Ollama, while the frontend is built with React, TypeScript, and Redux Toolkit Query, protected by Google OAuth and custom JWT authentication.
 
 ---
 

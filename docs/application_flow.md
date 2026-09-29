@@ -1,6 +1,6 @@
-# DocMind Application Flow & Execution Lifecycle
+# AskPDF Application Flow & Execution Lifecycle
 
-This document details the end-to-end operational flow of the **DocMind (AI Research Assistant)** application. It covers data flow diagrams, sequence flows, state transitions, and step-by-step subsystem execution paths.
+This document details the end-to-end operational flow of the **AskPDF (AI Research Assistant)** application. It covers data flow diagrams, sequence flows, state transitions, and step-by-step subsystem execution paths.
 
 ---
 
@@ -18,7 +18,7 @@ This document details the end-to-end operational flow of the **DocMind (AI Resea
 
 ## 1. End-to-End High-Level System Architecture
 
-The DocMind system is partitioned into five distinct layers:
+The AskPDF system is partitioned into five distinct layers:
 1. **Client / UI Layer:** React 18 + TypeScript SPA with Redux Toolkit (RTK) Query.
 2. **API & Security Gateway:** FastAPI async server with Google OAuth 2.0 validation and JWT verification.
 3. **Multi-Tenant Application Registry:** Per-user dependency injection holding isolated `DocumentStore`, `KeywordSearch`, and `VectorIndex` instances.

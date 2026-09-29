@@ -1,12 +1,12 @@
-# DocMind Architecture & Technical Specification
+# AskPDF Architecture & Technical Specification
 
-This document details the production-ready, domain-driven Retrieval-Augmented Generation (RAG) architecture of **DocMind (AI Research Assistant)**.
+This document details the production-ready, domain-driven Retrieval-Augmented Generation (RAG) architecture of **AskPDF (AI Research Assistant)**.
 
 ---
 
 ## 1. System Overview
 
-**DocMind** is a local-first, privacy-focused AI research platform designed to ingest complex multi-page documents (PDFs), construct a high-precision hybrid semantic index, and deliver grounded, citation-backed answers to user queries with zero external data leakage.
+**AskPDF** is a local-first, privacy-focused AI research platform designed to ingest complex multi-page documents (PDFs), construct a high-precision hybrid semantic index, and deliver grounded, citation-backed answers to user queries with zero external data leakage.
 
 The application adheres strictly to **Domain-Driven Design (DDD)** and separation of concerns, operating in two primary operational phases:
 1. **Multi-Tenant Ingestion Mode**: Extracts text, structures chunk hierarchies, and persists dual-index representations (dense vector + sparse lexical) isolated per user.
@@ -61,7 +61,7 @@ All indices are stored with strict user segregation under `backend/storage/{user
 
 ## 4. The Two-Stage Hybrid Retrieval Pipeline
 
-DocMind implements an advanced **Hybrid Retrieval + Re-ranking** architecture to overcome the classic blind spots of pure vector search.
+AskPDF implements an advanced **Hybrid Retrieval + Re-ranking** architecture to overcome the classic blind spots of pure vector search.
 
 ```text
 User Question -> Query Rewriter (LLM) -> [Dense FAISS + Sparse BM25] -> Reciprocal Rank Fusion (RRF) -> Cross-Encoder Re-ranker -> Context Builder -> LLM Generator
