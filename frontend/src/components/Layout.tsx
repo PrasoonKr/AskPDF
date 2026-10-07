@@ -85,7 +85,7 @@ export default function Layout() {
                   AskPDF
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', fontWeight: 500, fontSize: '0.72rem' }}>
-                  Local AI Research Engine
+                  Get Your Answers Instantly
                 </Typography>
               </Box>
             </Box>
@@ -153,9 +153,6 @@ export default function Layout() {
                 </IconButton>
               </Box>
             )}
-            <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}>
-              AskPDF v1.0 • 100% Local Inference
-            </Typography>
           </Box>
         </Box>
       </Drawer>

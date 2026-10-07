@@ -50,7 +50,7 @@ def _warmup_services():
         from backend.llm.client import OllamaClient
         client = OllamaClient()
         client.warmup()
-        print("[AskPDF Warmup] Ollama LLM loaded and pinned in RAM (zero cold starts).", flush=True)
+        print("[AskPDF Warmup] Ollama LLM loaded into RAM (unloads after 5m of inactivity).", flush=True)
     except Exception as e:
         print(f"[AskPDF Warmup] Ollama warmup warning: {e}", flush=True)
 

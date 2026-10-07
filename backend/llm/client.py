@@ -20,7 +20,6 @@ class OllamaClient:
                     "temperature": LLMConfig.TEMPERATURE,
                     "num_ctx": LLMConfig.NUM_CTX,
                 },
-                keep_alive=-1,
             )
         except Exception as e:
             print(f"Ollama warmup warning: {e}")
@@ -55,7 +54,6 @@ class OllamaClient:
                 "temperature": LLMConfig.TEMPERATURE,
                 "num_ctx": LLMConfig.NUM_CTX,
             },
-            keep_alive=-1,
         )
 
         return response["message"]["content"]
@@ -89,7 +87,6 @@ class OllamaClient:
                 "temperature": LLMConfig.TEMPERATURE,
                 "num_ctx": LLMConfig.NUM_CTX,
             },
-            keep_alive=-1,
             stream=True,
         )
 
