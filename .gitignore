@@ -11,4 +11,5 @@ backend/storage/*/
 backend/storage/*.pkl
 backend/storage/*.index
 *.pkl
-*.index
+*.index
+*.db

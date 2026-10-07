@@ -1,0 +1,53 @@
+name: Build and Auto-Commit Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      # Only trigger if frontend code changes
+      - 'frontend/src/**'
+      - 'frontend/public/**'
+      - 'frontend/package.json'
+      - 'frontend/vite.config.ts'
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Need write permission to push commits
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24' # Use modern Node.js
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install Dependencies
+        working-directory: ./frontend
+        run: npm ci || npm install
+
+      - name: Build React App
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Commit and Push built assets
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Force add the dist folder (in case it is in .gitignore)
+          git add -f frontend/dist/
+          
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: auto-build frontend dist assets [skip ci]"
+            git push
+          fi
