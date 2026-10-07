@@ -1,157 +1,161 @@
 import os
-# NOTE: OMP/MKL/OPENBLAS thread limits removed — they were crippling CrossEncoder reranking
-# FAISS search is already fast single-threaded; the CrossEncoder needs multi-threaded BLAS
-
-
 import faiss
-import pickle
+import numpy as np
 import sys
 import pathlib
+from typing import List
 
-# Ensure cross-Python version pickle compatibility (Python 3.13 serializes pathlib as pathlib._local)
 if "pathlib._local" not in sys.modules:
     sys.modules["pathlib._local"] = pathlib
-
-from typing import List
-import numpy as np
 
 from backend.config import RetrievalConfig
 from backend.models.document import Document
 from backend.models.search_result import SearchResult
+from backend.models.source import SourceDocument
 
 from backend.storage.paths import get_user_storage_dir
-
+from backend.database.session import SessionLocal
+from backend.database import repository
 
 class DocumentStore:
     """
-    Stores document chunks and their embeddings.
-    Responsible for adding, searching, counting,
-    and clearing documents.
+    Stores document chunk embeddings in FAISS and uses SQLite for actual text storage.
     """
 
     def __init__(self, embedding_service, user_email: str = "default"):
         self.user_email = user_email
-        self.documents = []
         self.embedding_service = embedding_service
-        self.index = faiss.IndexFlatIP(self.embedding_service.dimension())
+        self.dimension = self.embedding_service.dimension()
+        self.index = faiss.IndexIDMap(faiss.IndexFlatIP(self.dimension))
+
+    def _get_user_id(self, db):
+        user = repository.get_or_create_user(db, self.user_email)
+        return user.id
 
     def add_documents(self, documents: List[Document], embeddings: np.ndarray) -> None:
-        """
-        Add documents and their embeddings to the store.
-        """
-
         if len(documents) != len(embeddings):
-            raise ValueError(
-                "The number of documents and embeddings must be equal."
-            )
-
-        self.documents.extend(documents)
-        
+            raise ValueError("The number of documents and embeddings must be equal.")
         if embeddings.ndim != 2:
             raise ValueError("Embeddings must be a 2D NumPy array.")
-
-        self.index.add(embeddings)
+            
+        with SessionLocal() as db:
+            user_id = self._get_user_id(db)
+            
+            # Find max faiss_id to safely append
+            max_faiss_id = 0
+            if self.index.ntotal > 0:
+                chunks = repository.get_all_chunks(db, user_id)
+                if chunks:
+                    max_faiss_id = max(c.faiss_id for c in chunks)
+            
+            faiss_ids = np.arange(max_faiss_id + 1, max_faiss_id + 1 + len(documents)).astype(np.int64)
+            self.index.add_with_ids(embeddings, faiss_ids)
+            
+            chunks_data = []
+            for i, doc in enumerate(documents):
+                chunks_data.append({
+                    "user_id": user_id,
+                    "filename": doc.source.filename,
+                    "chunk_index": i,
+                    "page": doc.page,
+                    "text": doc.text,
+                    "faiss_id": int(faiss_ids[i])
+                })
+                
+            repository.add_document_chunks(db, user_id, documents[0].source.filename, chunks_data)
 
     def semantic_search(self, query_embedding: np.ndarray, top_k: int = RetrievalConfig.SEARCH_TOP_K) -> List[SearchResult]:
-        """
-        Return the top-k most similar documents.
-        """
-        
         if query_embedding.ndim != 2:
             raise ValueError("Query embedding must have shape (1, dimension).")
 
-        results = []
-        
         if self.count() == 0:
             return []
-        
-        distances, indices = self.index.search(query_embedding, top_k)
 
-        for document_index, score in zip(indices[0], distances[0]):
-            if document_index == -1:
-                continue
-            
-            results.append(
-                SearchResult(
-                    document=self.documents[document_index],
-                    score=float(score)
-                )
-            )
+        distances, indices = self.index.search(query_embedding, top_k)
         
+        faiss_ids = [int(idx) for idx in indices[0] if idx != -1]
+        
+        with SessionLocal() as db:
+            chunks = repository.get_chunks_by_faiss_ids(db, faiss_ids)
+            chunk_map = {c.faiss_id: c for c in chunks}
+            
+            results = []
+            for document_index, score in zip(indices[0], distances[0]):
+                if document_index == -1 or document_index not in chunk_map:
+                    continue
+                db_chunk = chunk_map[document_index]
+                doc = Document(
+                    chunk_id=db_chunk.id,
+                    source=SourceDocument(filename=db_chunk.filename, path=db_chunk.filename),
+                    page=db_chunk.page,
+                    text=db_chunk.text
+                )
+                results.append(SearchResult(document=doc, score=float(score)))
+                
         return results
 
     def count(self):
-        """
-        Return the number of stored documents.
-        """
-        return len(self.documents)
+        return self.index.ntotal
 
     def clear(self):
-        """
-        Clear all documents and recreate the FAISS index.
-        """
+        self.index = faiss.IndexIDMap(faiss.IndexFlatIP(self.dimension))
+        with SessionLocal() as db:
+            user_id = self._get_user_id(db)
+            chunks = repository.get_all_chunks(db, user_id)
+            for c in chunks:
+                db.delete(c)
+            db.commit()
 
-        self.documents.clear()
-
-        self.index = faiss.IndexFlatIP(
-            self.embedding_service.dimension()
-        )
-        
     def remove_document(self, filename: str):
-        """
-        Remove a specific document from the store and rebuild the index.
-        """
-        indices_to_keep = [i for i, doc in enumerate(self.documents) if doc.source.filename != filename]
-        
-        if len(indices_to_keep) == len(self.documents):
-            return # Document not found
-            
-        new_documents = []
-        new_embeddings = []
-        
-        for i in indices_to_keep:
-            new_documents.append(self.documents[i])
-            # Reconstruct the original embedding vector
-            new_embeddings.append(self.index.reconstruct(i))
-            
-        self.documents = new_documents
-        self.index = faiss.IndexFlatIP(self.embedding_service.dimension())
-        if new_embeddings:
-            self.index.add(np.array(new_embeddings))
-        
+        with SessionLocal() as db:
+            user_id = self._get_user_id(db)
+            faiss_ids = repository.delete_document_chunks(db, user_id, filename)
+            if faiss_ids:
+                self.index.remove_ids(np.array(faiss_ids, dtype=np.int64))
+
     def save(self):
-        """
-        Persist the FAISS index and documents.
-        """
         storage_dir = get_user_storage_dir(self.user_email)
-
-        faiss.write_index(
-            self.index,
-            str(storage_dir / "faiss.index"),
-        )
-
-        with open(storage_dir / "documents.pkl", "wb") as file:
-            pickle.dump(
-                self.documents,
-                file,
-            )
+        faiss.write_index(self.index, str(storage_dir / "faiss.index"))
 
     def load(self):
-        """
-        Load the FAISS index and documents.
-        """
         storage_dir = get_user_storage_dir(self.user_email)
-
-        self.index = faiss.read_index(
-            str(storage_dir / "faiss.index")
-        )
-
-        with open(storage_dir / "documents.pkl", "rb") as file:
-            self.documents = pickle.load(file)
+        self.index = faiss.read_index(str(storage_dir / "faiss.index"))
+        
+        # MIGRATION LOGIC: Move documents.pkl to SQLite on first load
+        pkl_path = storage_dir / "documents.pkl"
+        if pkl_path.exists():
+            print("Migrating documents.pkl to SQLite...")
+            import pickle
+            with open(pkl_path, "rb") as file:
+                old_documents = pickle.load(file)
+                
+            if not isinstance(self.index, faiss.IndexIDMap):
+                print("Converting IndexFlatIP to IndexIDMap...")
+                new_index = faiss.IndexIDMap(faiss.IndexFlatIP(self.dimension))
+                faiss_ids = np.arange(self.index.ntotal).astype(np.int64)
+                if self.index.ntotal > 0:
+                    vectors = self.index.reconstruct_n(0, self.index.ntotal)
+                    new_index.add_with_ids(vectors, faiss_ids)
+                self.index = new_index
+                self.save()
+                
+            with SessionLocal() as db:
+                user_id = self._get_user_id(db)
+                chunks_data = []
+                for i, doc in enumerate(old_documents):
+                    chunks_data.append({
+                        "user_id": user_id,
+                        "filename": getattr(getattr(doc, "source", None), "filename", "Unknown"),
+                        "chunk_index": i,
+                        "page": getattr(doc, "page", 1),
+                        "text": getattr(doc, "text", ""),
+                        "faiss_id": i
+                    })
+                repository.add_document_chunks(db, user_id, "", chunks_data)
+                
+            pkl_path.unlink()
+            print("Migration complete!")
 
     def exists(self):
-        """
-        Return True if a persisted knowledge base exists.
-        """
         storage_dir = get_user_storage_dir(self.user_email)
-        return (storage_dir / "faiss.index").exists() and (storage_dir / "documents.pkl").exists()
+        return (storage_dir / "faiss.index").exists()

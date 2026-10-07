@@ -42,17 +42,7 @@ export default function ChatInterface() {
   const isLoading = isStreaming;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const initSession = async () => {
-      try {
-        const res = await createSession().unwrap();
-        setSessionId(res.session_id);
-      } catch (err) {
-        console.error('Failed to create session', err);
-      }
-    };
-    initSession();
-  }, [createSession]);
+
 
   useEffect(() => {
     const handleNewChat = async () => {
@@ -61,16 +51,11 @@ export default function ChatInterface() {
       }
       setMessages([]);
       setInput('');
-      try {
-        const res = await createSession().unwrap();
-        setSessionId(res.session_id);
-      } catch (err) {
-        console.error('Failed to create new session', err);
-      }
+      setSessionId(null);
     };
     window.addEventListener('new-chat', handleNewChat);
     return () => window.removeEventListener('new-chat', handleNewChat);
-  }, [createSession]);
+  }, []);
 
   // Load a past session from the sidebar
   const [fetchMessages] = useLazyGetSessionMessagesQuery();
@@ -109,7 +94,19 @@ export default function ChatInterface() {
 
   const handleSendQuery = async (queryText: string) => {
     const trimmed = queryText.trim();
-    if (!trimmed || !sessionId || isLoading) return;
+    if (!trimmed || isLoading) return;
+
+    let currentSessionId = sessionId;
+    if (!currentSessionId) {
+      try {
+        const res = await createSession().unwrap();
+        currentSessionId = res.session_id;
+        setSessionId(currentSessionId);
+      } catch (err) {
+        console.error('Failed to create session', err);
+        return;
+      }
+    }
 
     const userMessage: Message = {
       id: Date.now(),
@@ -142,7 +139,7 @@ export default function ChatInterface() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          session_id: sessionId,
+          session_id: currentSessionId,
           question: trimmed,
         }),
         signal: abortController.signal,
@@ -511,7 +508,7 @@ export default function ChatInterface() {
               fontSize: '0.95rem',
               '& input::placeholder': { color: 'text.secondary', opacity: 0.8 },
             }}
-            disabled={isLoading || !sessionId}
+            disabled={isLoading}
           />
 
           {isLoading ? (
@@ -531,7 +528,7 @@ export default function ChatInterface() {
           ) : (
             <IconButton
               onClick={() => handleSendQuery(input)}
-              disabled={!input.trim() || !sessionId}
+              disabled={!input.trim()}
               sx={{
                 width: 40,
                 height: 40,

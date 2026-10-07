@@ -78,3 +78,14 @@ class ChatMessage(Base):
     created_at = Column(DateTime, default=_utcnow)
 
     session = relationship("ChatSession", back_populates="messages")
+
+class DocumentChunk(Base):
+    __tablename__ = "document_chunks"
+
+    id = Column(String, primary_key=True, default=_new_id)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    filename = Column(String, nullable=False, index=True)
+    chunk_index = Column(Integer, nullable=False)
+    page = Column(Integer, nullable=False)
+    text = Column(Text, nullable=False)
+    faiss_id = Column(Integer, nullable=False, index=True)

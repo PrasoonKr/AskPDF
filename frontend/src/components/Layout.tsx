@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, Drawer, Typography, Divider, Avatar, IconButton, Button, useTheme, useMediaQuery, Badge, List, ListItemButton, ListItemText, ListItemIcon, Tooltip } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -20,6 +20,28 @@ export default function Layout() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isLeftDrawerOpen, setIsLeftDrawerOpen] = useState(false);
   const [isRightDrawerOpen, setIsRightDrawerOpen] = useState(false);
+
+  const [rightDrawerWidth, setRightDrawerWidth] = useState(360);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = useCallback(() => setIsResizing(true), []);
+  const stopResizing = useCallback(() => setIsResizing(false), []);
+  const resize = useCallback((e: MouseEvent) => {
+    if (isResizing) {
+      const newWidth = document.body.clientWidth - e.clientX;
+      if (newWidth > 250 && newWidth < 800) setRightDrawerWidth(newWidth);
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    window.addEventListener("mousemove", resize);
+    window.addEventListener("mouseup", stopResizing);
+    return () => {
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
+    };
+  }, [resize, stopResizing]);
+
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
   const navigate = useNavigate();
@@ -245,29 +267,31 @@ export default function Layout() {
             )}
           </Box>
 
-          <Button
-            variant="outlined"
-            onClick={() => setIsRightDrawerOpen(true)}
-            startIcon={
-              <Badge badgeContent={docCount} color="primary" sx={{ '& .MuiBadge-badge': { fontSize: '0.65rem', height: 16, minWidth: 16 } }}>
-                <FolderIcon fontSize="small" />
-              </Badge>
-            }
-            sx={{
-              color: '#e2e8f0',
-              borderColor: 'rgba(255,255,255,0.12)',
-              bgcolor: 'rgba(255,255,255,0.02)',
-              borderRadius: '10px',
-              fontSize: '0.8rem',
-              py: 0.6,
-              '&:hover': {
-                bgcolor: 'rgba(99, 102, 241, 0.1)',
-                borderColor: '#6366f1',
+          {isMobile && (
+            <Button
+              variant="outlined"
+              onClick={() => setIsRightDrawerOpen(true)}
+              startIcon={
+                <Badge badgeContent={docCount} color="primary" sx={{ '& .MuiBadge-badge': { fontSize: '0.65rem', height: 16, minWidth: 16 } }}>
+                  <FolderIcon fontSize="small" />
+                </Badge>
               }
-            }}
-          >
-            Library ({docCount})
-          </Button>
+              sx={{
+                color: '#e2e8f0',
+                borderColor: 'rgba(255,255,255,0.12)',
+                bgcolor: 'rgba(255,255,255,0.02)',
+                borderRadius: '10px',
+                fontSize: '0.8rem',
+                py: 0.6,
+                '&:hover': {
+                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                  borderColor: '#6366f1',
+                }
+              }}
+            >
+              Library ({docCount})
+            </Button>
+          )}
         </Box>
 
         {/* Chat Interface Outlet */}
@@ -279,19 +303,40 @@ export default function Layout() {
       {/* Right Drawer: Knowledge Base Details */}
       <Drawer
         anchor="right"
-        open={isRightDrawerOpen}
+        variant={isMobile ? "temporary" : "permanent"}
+        open={isMobile ? isRightDrawerOpen : true}
         onClose={() => setIsRightDrawerOpen(false)}
         sx={{
+          width: isMobile ? 0 : rightDrawerWidth,
+          flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: { xs: '100%', sm: 380 },
+            width: { xs: '100%', sm: rightDrawerWidth },
             boxSizing: 'border-box',
-            backgroundColor: 'rgba(10, 14, 26, 0.95)',
+            backgroundColor: 'rgba(10, 14, 26, 0.85)',
             backdropFilter: 'blur(20px)',
             borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
             p: 3,
+            transition: isResizing ? 'none' : theme.transitions.create('width'),
           },
         }}
       >
+        {!isMobile && (
+          <Box
+            onMouseDown={startResizing}
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: '6px',
+              cursor: 'col-resize',
+              bgcolor: isResizing ? '#6366f1' : 'transparent',
+              transition: 'background-color 0.2s',
+              '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.5)' },
+              zIndex: 100,
+            }}
+          />
+        )}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#f8fafc' }}>
             Document Library
@@ -300,11 +345,8 @@ export default function Layout() {
             {docCount} Files
           </Box>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, fontSize: '0.825rem' }}>
-          All uploaded files are parsed, chunked, and embedded into your isolated FAISS index.
-        </Typography>
-        <DocumentUploader />
-        <Box sx={{ mt: 3 }}>
+        
+        <Box sx={{ mt: 1 }}>
           <DocumentList />
         </Box>
       </Drawer>

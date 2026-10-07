@@ -128,3 +128,26 @@ def delete_document_record(db: Session, user_id: str, filename: str) -> bool:
         db.commit()
         return True
     return False
+
+# ─── Document Chunks ──────────────────────────────────────────────
+
+from backend.database.models import DocumentChunk
+
+def add_document_chunks(db: Session, user_id: str, filename: str, chunks_data: list[dict]):
+    db.bulk_insert_mappings(DocumentChunk, chunks_data)
+    db.commit()
+
+def get_chunks_by_faiss_ids(db: Session, faiss_ids: list[int]) -> list[DocumentChunk]:
+    if not faiss_ids: return []
+    return db.query(DocumentChunk).filter(DocumentChunk.faiss_id.in_(faiss_ids)).all()
+
+def delete_document_chunks(db: Session, user_id: str, filename: str) -> list[int]:
+    chunks = db.query(DocumentChunk).filter_by(user_id=user_id, filename=filename).all()
+    faiss_ids = [c.faiss_id for c in chunks]
+    for c in chunks:
+        db.delete(c)
+    db.commit()
+    return faiss_ids
+
+def get_all_chunks(db: Session, user_id: str) -> list[DocumentChunk]:
+    return db.query(DocumentChunk).filter_by(user_id=user_id).all()
