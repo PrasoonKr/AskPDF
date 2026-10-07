@@ -21,10 +21,24 @@ class ResearchAssistantService:
         self.session_service = session_service
         self.trace_formatter = trace_formatter
         self.adaptive_pipeline = adaptive_pipeline
+        self._session_map = {}  # DB session ID -> in-memory session ID
 
     def create_session(self) -> str:
 
         return self.session_service.create_session()
+
+    def map_session(self, db_session_id: str, memory_session_id: str):
+        """Map a persistent DB session ID to an in-memory RAG session ID."""
+        self._session_map[db_session_id] = memory_session_id
+
+    def _resolve_session(self, session_id: str) -> str:
+        """Resolve a DB session ID to the in-memory session ID, creating one if needed."""
+        if session_id in self._session_map:
+            return self._session_map[session_id]
+        # If no mapping exists, create a new in-memory session and map it
+        memory_id = self.session_service.create_session()
+        self._session_map[session_id] = memory_id
+        return memory_id
 
     def delete_session(
         self,
@@ -35,8 +49,8 @@ class ResearchAssistantService:
         )
 
     def ask(self, session_id: str, question: str, cancel_flag: dict = None):
-        
-        memory = self.session_service.get_memory(session_id)
+        memory_id = self._resolve_session(session_id)
+        memory = self.session_service.get_memory(memory_id)
         
         summary = memory.get_summary()
         rewrite_history = memory.get_recent_turns(limit=ConversationConfig.GENERATION_HISTORY_TURNS)
@@ -154,8 +168,8 @@ class ResearchAssistantService:
     def ask_stream(self, session_id: str, question: str, cancel_flag: dict = None):
         import json
         import re
-
-        memory = self.session_service.get_memory(session_id)
+        memory_id = self._resolve_session(session_id)
+        memory = self.session_service.get_memory(memory_id)
         summary = memory.get_summary()
         rewrite_history = memory.get_recent_turns(limit=ConversationConfig.GENERATION_HISTORY_TURNS)
 

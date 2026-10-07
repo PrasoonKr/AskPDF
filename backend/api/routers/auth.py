@@ -1,12 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from sqlalchemy.orm import Session as DBSession
 import jwt
 import datetime
-
 import os
 from dotenv import load_dotenv
+
+from backend.database.session import get_db
+from backend.database import repository as repo
 
 load_dotenv("backend/.env")
 
@@ -23,7 +26,7 @@ CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "YOUR_CLIENT_ID_HERE")
 JWT_SECRET = os.getenv("JWT_SECRET", "super_secret_jwt_key_for_ai_research_assistant")
 
 @router.post("/google", response_model=LoginResponse)
-async def google_login(req: GoogleLoginRequest):
+async def google_login(req: GoogleLoginRequest, db: DBSession = Depends(get_db)):
     try:
         if CLIENT_ID == "YOUR_CLIENT_ID_HERE":
             # For testing without a real client ID, we could mock the response, but it's better to fail 
@@ -45,7 +48,9 @@ async def google_login(req: GoogleLoginRequest):
             "picture": picture,
             "exp": expiration.timestamp()
         }, JWT_SECRET, algorithm="HS256")
-        
+        # Ensure user exists in DB
+        repo.get_or_create_user(db, email=email, name=name, picture=picture)
+
         return LoginResponse(
             token=token,
             user={"email": email, "name": name, "picture": picture}
@@ -55,7 +60,7 @@ async def google_login(req: GoogleLoginRequest):
 
 
 @router.post("/dev-login", response_model=LoginResponse)
-async def dev_login():
+async def dev_login(db: DBSession = Depends(get_db)):
     email = "dev@example.com"
     name = "Developer"
     expiration = datetime.datetime.utcnow() + datetime.timedelta(days=7)
@@ -66,7 +71,9 @@ async def dev_login():
         "picture": "",
         "exp": expiration.timestamp()
     }, JWT_SECRET, algorithm="HS256")
-    
+    # Ensure dev user exists in DB
+    repo.get_or_create_user(db, email=email, name=name)
+
     return LoginResponse(
         token=token,
         user={"email": email, "name": name, "picture": ""}

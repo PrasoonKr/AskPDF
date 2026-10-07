@@ -59,6 +59,12 @@ def _warmup_services():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create database tables (no-op if they already exist)
+    from backend.database.session import engine
+    from backend.database.models import Base
+    Base.metadata.create_all(bind=engine)
+    print("[AskPDF] Database tables initialized.", flush=True)
+
     # Block startup until all models are loaded — prevents cold-start on first query
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, _warmup_services)
