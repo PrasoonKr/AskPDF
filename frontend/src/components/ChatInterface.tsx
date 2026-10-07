@@ -16,10 +16,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import LightbulbIcon from '@mui/icons-material/Lightbulb';
-import FunctionsIcon from '@mui/icons-material/Functions';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
+
 import { useCreateSessionMutation, useLazyGetSessionMessagesQuery } from '../api/apiSlice';
 
 interface Message {
