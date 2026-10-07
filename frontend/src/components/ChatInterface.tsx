@@ -20,7 +20,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
-import { useCreateSessionMutation } from '../api/apiSlice';
+import { useCreateSessionMutation, useLazyGetSessionMessagesQuery } from '../api/apiSlice';
 
 interface Message {
   id: number;
@@ -30,28 +30,7 @@ interface Message {
   trace?: string;
 }
 
-const SUGGESTIONS = [
-  {
-    icon: <MenuBookIcon sx={{ fontSize: 20, color: '#818cf8' }} />,
-    title: 'Summarize Key Concepts',
-    query: 'Provide a comprehensive summary of the main concepts discussed in this document.',
-  },
-  {
-    icon: <FunctionsIcon sx={{ fontSize: 20, color: '#f472b6' }} />,
-    title: 'Formulas & Definitions',
-    query: 'What are the core equations, laws, or technical definitions explained in this text?',
-  },
-  {
-    icon: <LightbulbIcon sx={{ fontSize: 20, color: '#38bdf8' }} />,
-    title: 'Practical Takeaways',
-    query: 'What are the key takeaways, conclusions, and practical applications in this document?',
-  },
-  {
-    icon: <FactCheckIcon sx={{ fontSize: 20, color: '#34d399' }} />,
-    title: 'Evidence & Methodology',
-    query: 'Explain the methodology and experimental or analytical evidence presented.',
-  },
-];
+
 
 export default function ChatInterface() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -95,6 +74,37 @@ export default function ChatInterface() {
     window.addEventListener('new-chat', handleNewChat);
     return () => window.removeEventListener('new-chat', handleNewChat);
   }, [createSession]);
+
+  // Load a past session from the sidebar
+  const [fetchMessages] = useLazyGetSessionMessagesQuery();
+  useEffect(() => {
+    const handleLoadSession = async (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail?.sessionId) return;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      setSessionId(detail.sessionId);
+      setInput('');
+      setIsStreaming(false);
+      try {
+        const res = await fetchMessages(detail.sessionId).unwrap();
+        const loadedMessages: Message[] = (res.messages || []).map((m: any, i: number) => ({
+          id: Date.now() + i,
+          type: m.role as 'user' | 'assistant',
+          content: m.content,
+          sources: m.sources || undefined,
+          trace: m.trace || undefined,
+        }));
+        setMessages(loadedMessages);
+      } catch (err) {
+        console.error('Failed to load session messages', err);
+        setMessages([]);
+      }
+    };
+    window.addEventListener('load-session', handleLoadSession);
+    return () => window.removeEventListener('load-session', handleLoadSession);
+  }, [fetchMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -317,52 +327,7 @@ export default function ChatInterface() {
               Upload any PDF document to research with grounded citations, hybrid search, and cross-encoder re-ranking.
             </Typography>
 
-            {/* Starter Suggestion Grid */}
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-                gap: 2,
-                maxWidth: 720,
-                width: '100%',
-              }}
-            >
-              {SUGGESTIONS.map((sugg, i) => (
-                <Paper
-                  key={i}
-                  onClick={() => handleSendQuery(sugg.query)}
-                  sx={{
-                    p: 2.5,
-                    bgcolor: 'rgba(255, 255, 255, 0.02)',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255, 255, 255, 0.07)',
-                    borderRadius: '16px',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 0.8,
-                    '&:hover': {
-                      bgcolor: 'rgba(99, 102, 241, 0.08)',
-                      borderColor: 'rgba(99, 102, 241, 0.35)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
-                    },
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
-                    {sugg.icon}
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#f8fafc' }}>
-                      {sugg.title}
-                    </Typography>
-                  </Box>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4 }}>
-                    {sugg.query}
-                  </Typography>
-                </Paper>
-              ))}
-            </Box>
+
           </Box>
         )}
 

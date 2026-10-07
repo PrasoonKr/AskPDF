@@ -27,13 +27,36 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Documents'],
+  tagTypes: ['Documents', 'Sessions'],
   endpoints: (builder) => ({
     createSession: builder.mutation<{ session_id: string }, void>({
       query: () => ({
         url: '/sessions',
         method: 'POST',
       }),
+      invalidatesTags: ['Sessions'],
+    }),
+    listSessions: builder.query<{ sessions: { id: string; title: string; created_at: string; updated_at: string }[] }, void>({
+      query: () => '/sessions',
+      providesTags: ['Sessions'],
+    }),
+    getSessionMessages: builder.query<{ messages: { id: string; role: string; content: string; sources?: any[]; trace?: any; created_at: string }[] }, string>({
+      query: (sessionId) => `/sessions/${sessionId}/messages`,
+    }),
+    renameSession: builder.mutation<any, { sessionId: string; title: string }>({
+      query: ({ sessionId, title }) => ({
+        url: `/sessions/${sessionId}`,
+        method: 'PATCH',
+        body: { title },
+      }),
+      invalidatesTags: ['Sessions'],
+    }),
+    deleteSession: builder.mutation<any, string>({
+      query: (sessionId) => ({
+        url: `/sessions/${sessionId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Sessions'],
     }),
     askQuestion: builder.mutation<{ answer: string, sources: any[], trace?: string }, { session_id: string, question: string }>({
       query: (body) => ({
@@ -88,6 +111,11 @@ export const apiSlice = createApi({
 
 export const {
   useCreateSessionMutation,
+  useListSessionsQuery,
+  useGetSessionMessagesQuery,
+  useLazyGetSessionMessagesQuery,
+  useRenameSessionMutation,
+  useDeleteSessionMutation,
   useAskQuestionMutation,
   useGetDocumentsQuery,
   useUploadDocumentMutation,

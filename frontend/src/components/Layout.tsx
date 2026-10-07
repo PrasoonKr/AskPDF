@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Box, Drawer, Typography, Divider, Avatar, IconButton, Button, useTheme, useMediaQuery, Badge } from '@mui/material';
+import { Box, Drawer, Typography, Divider, Avatar, IconButton, Button, useTheme, useMediaQuery, Badge, List, ListItemButton, ListItemText, ListItemIcon, Tooltip } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { apiSlice, useGetDocumentsQuery } from '../api/apiSlice';
+import { apiSlice, useGetDocumentsQuery, useListSessionsQuery, useDeleteSessionMutation } from '../api/apiSlice';
 import DocumentUploader from './DocumentUploader';
 import DocumentList from './DocumentList';
 import AddIcon from '@mui/icons-material/Add';
@@ -10,6 +10,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import FolderIcon from '@mui/icons-material/Folder';
 import MenuIcon from '@mui/icons-material/Menu';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const drawerWidth = 290;
 
@@ -26,11 +28,29 @@ export default function Layout() {
   const { data: docsData } = useGetDocumentsQuery();
   const docCount = docsData?.documents?.length || 0;
 
+  const { data: sessionsData } = useListSessionsQuery();
+  const sessions = sessionsData?.sessions || [];
+  const [deleteSession] = useDeleteSessionMutation();
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     dispatch(apiSlice.util.resetApiState());
     navigate('/login');
+  };
+
+  const handleNewChat = () => {
+    window.dispatchEvent(new Event('new-chat'));
+  };
+
+  const handleSelectSession = (sessionId: string) => {
+    window.dispatchEvent(new CustomEvent('load-session', { detail: { sessionId } }));
+    if (isMobile) setIsLeftDrawerOpen(false);
+  };
+
+  const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
+    e.stopPropagation();
+    await deleteSession(sessionId);
   };
 
   return (
@@ -98,7 +118,7 @@ export default function Layout() {
             <Button
               fullWidth
               variant="contained"
-              onClick={() => window.dispatchEvent(new Event('new-chat'))}
+              onClick={handleNewChat}
               startIcon={<AddIcon />}
               sx={{
                 background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
@@ -119,20 +139,63 @@ export default function Layout() {
             <DocumentUploader />
           </Box>
 
-          {/* Quick Knowledge Base Preview */}
-          <Box sx={{ px: 2.5, py: 1.5, flexGrow: 1, overflowY: 'auto' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', fontSize: '0.7rem' }}>
-                Active Documents ({docCount})
-              </Typography>
-            </Box>
-            <DocumentList />
+          {/* Chat History */}
+          <Box sx={{ px: 1, py: 1, flexGrow: 1, overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 2 } }}>
+            <Typography variant="caption" sx={{ px: 1.5, color: 'text.secondary', fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', fontSize: '0.7rem' }}>
+              Recent Chats
+            </Typography>
+            <List dense sx={{ mt: 0.5 }}>
+              {sessions.length === 0 && (
+                <Typography variant="body2" sx={{ px: 1.5, py: 2, color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', textAlign: 'center' }}>
+                  No conversations yet
+                </Typography>
+              )}
+              {sessions.map((session) => (
+                <ListItemButton
+                  key={session.id}
+                  onClick={() => handleSelectSession(session.id)}
+                  sx={{
+                    borderRadius: '10px',
+                    mb: 0.3,
+                    py: 0.8,
+                    px: 1.5,
+                    '&:hover': {
+                      bgcolor: 'rgba(99, 102, 241, 0.08)',
+                    },
+                    '&:hover .delete-btn': {
+                      opacity: 1,
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    <ChatBubbleIcon sx={{ fontSize: 16, color: 'rgba(255,255,255,0.35)' }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography noWrap sx={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
+                        {session.title}
+                      </Typography>
+                    }
+                  />
+                  <Tooltip title="Delete">
+                    <IconButton
+                      className="delete-btn"
+                      size="small"
+                      onClick={(e) => handleDeleteSession(e, session.id)}
+                      sx={{ opacity: 0, transition: 'opacity 0.2s', color: 'rgba(255,255,255,0.3)', '&:hover': { color: '#ef4444' } }}
+                    >
+                      <DeleteIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </Tooltip>
+                </ListItemButton>
+              ))}
+            </List>
           </Box>
 
           {/* User Profile / Footer */}
           <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.06)', mt: 'auto', bgcolor: 'rgba(0,0,0,0.15)' }}>
             {user && (
-              <Box sx={{ p: 1.2, display: 'flex', alignItems: 'center', gap: 1.2, mb: 1.5, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <Box sx={{ p: 1.2, display: 'flex', alignItems: 'center', gap: 1.2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <Avatar
                   src={user.picture || undefined}
                   sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: '0.9rem', fontWeight: 700 }}
@@ -248,4 +311,3 @@ export default function Layout() {
     </Box>
   );
 }
-
