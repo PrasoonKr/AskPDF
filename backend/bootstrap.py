@@ -12,7 +12,6 @@ from backend.conversation.summarizer import ConversationSummarizer
 from backend.conversation.formatter import ConversationFormatter
 from backend.conversation.memory import ConversationMemory
 from backend.llm.service import LLMService
-from backend.llm.client import OllamaClient
 from backend.llm.generator import AnswerGenerator
 from backend.query.hybrid_rewriter import HybridRewriter
 from backend.query.llm_rewriter import LLMRewriter
@@ -20,14 +19,12 @@ from backend.query.rule_based import RuleBasedRewriter
 from backend.prompts.context_builder import ContextBuilder
 from backend.retrieval.retrieval_pipeline import RetrievalPipeline
 from backend.reranking.service import RerankingService
-from backend.reranking.cross_encoder import CrossEncoderReranker
-from backend.reranking.bedrock_reranker import BedrockCohereReranker
+from backend.reranking.cohere_reranker import NativeCohereReranker
 from backend.retrieval.semantic_search import SemanticSearch
 from backend.retrieval.keyword_search import KeywordSearch
 from backend.retrieval.hybrid_search import HybridSearch
-from backend.embeddings.service import EmbeddingService
-from backend.embeddings.bedrock_service import BedrockEmbeddingService
-from backend.llm.bedrock_client import BedrockLLMClient
+from backend.embeddings.cohere_service import CohereEmbeddingService
+from backend.llm.openai_client import OpenAILLMClient
 from backend.retrieval.document_store import DocumentStore
 
 from backend.adaptive.pipeline import AdaptiveRAGPipeline
@@ -40,16 +37,22 @@ def startup(user_email: str = "default") -> Application:
 
     import os
     env = os.getenv("RAG_ENVIRONMENT", "local")
+    if env == "production":
+        user_email = user_email + "_prod"
 
     trace_formatter = TraceFormatter()
     
     if env == "production":
-        print("🌍 Running in PRODUCTION mode (AWS Bedrock)")
-        embedding_service = BedrockEmbeddingService()
-        reranker = BedrockCohereReranker()
-        llm_client = BedrockLLMClient()
+        print("🌍 Running in PRODUCTION mode (Cohere Native + OpenAI Proxy)")
+        embedding_service = CohereEmbeddingService()
+        reranker = NativeCohereReranker()
+        llm_client = OpenAILLMClient()
     else:
         print("💻 Running in LOCAL mode (Ollama + PyTorch)")
+        from backend.embeddings.service import EmbeddingService
+        from backend.reranking.cross_encoder import CrossEncoderReranker
+        from backend.llm.client import OllamaClient
+        
         embedding_service = EmbeddingService()
         reranking_service = RerankingService()
         reranker = CrossEncoderReranker(reranking_service)

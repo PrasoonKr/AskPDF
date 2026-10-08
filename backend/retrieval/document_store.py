@@ -65,8 +65,9 @@ class DocumentStore:
             repository.add_document_chunks(db, user_id, documents[0].source.filename, chunks_data)
 
     def semantic_search(self, query_embedding: np.ndarray, top_k: int = RetrievalConfig.SEARCH_TOP_K) -> List[SearchResult]:
-        if query_embedding.ndim != 2:
-            raise ValueError("Query embedding must have shape (1, dimension).")
+        if getattr(query_embedding, "ndim", 1) != 2:
+            import numpy as np
+            query_embedding = np.array(query_embedding).reshape(1, -1)
 
         if self.count() == 0:
             return []

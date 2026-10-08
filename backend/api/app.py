@@ -6,10 +6,10 @@ try:
 except Exception:
     pass
 
-import torch
 try:
+    import torch
     torch.set_num_threads(6)
-except Exception:
+except ImportError:
     pass
 
 from contextlib import asynccontextmanager
@@ -31,6 +31,11 @@ from backend.api.routers import (
 
 def _warmup_services():
     """Warmup AI models in background to eliminate cold-start delays."""
+    env = os.getenv("RAG_ENVIRONMENT", "local").lower()
+    if env == "production":
+        print("[AskPDF Warmup] Running in production mode. Skipping local model warmup.", flush=True)
+        return
+
     print("[AskPDF Warmup] Preloading AI models into memory...", flush=True)
     try:
         from backend.embeddings.model import model as emb_model

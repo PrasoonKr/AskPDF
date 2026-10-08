@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 from backend.bootstrap import startup
 
-load_dotenv("backend/.env")
+load_dotenv("backend/.env", override=True)
 
 security = HTTPBearer()
 JWT_SECRET = os.getenv("JWT_SECRET", "super_secret_jwt_key_for_ai_research_assistant")
