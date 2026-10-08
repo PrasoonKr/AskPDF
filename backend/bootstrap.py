@@ -21,10 +21,13 @@ from backend.prompts.context_builder import ContextBuilder
 from backend.retrieval.retrieval_pipeline import RetrievalPipeline
 from backend.reranking.service import RerankingService
 from backend.reranking.cross_encoder import CrossEncoderReranker
+from backend.reranking.bedrock_reranker import BedrockCohereReranker
 from backend.retrieval.semantic_search import SemanticSearch
 from backend.retrieval.keyword_search import KeywordSearch
 from backend.retrieval.hybrid_search import HybridSearch
 from backend.embeddings.service import EmbeddingService
+from backend.embeddings.bedrock_service import BedrockEmbeddingService
+from backend.llm.bedrock_client import BedrockLLMClient
 from backend.retrieval.document_store import DocumentStore
 
 from backend.adaptive.pipeline import AdaptiveRAGPipeline
@@ -35,8 +38,23 @@ def startup(user_email: str = "default") -> Application:
     Build the application and all long-lived services.
     """
 
+    import os
+    env = os.getenv("RAG_ENVIRONMENT", "local")
+
     trace_formatter = TraceFormatter()
-    embedding_service = EmbeddingService()
+    
+    if env == "production":
+        print("🌍 Running in PRODUCTION mode (AWS Bedrock)")
+        embedding_service = BedrockEmbeddingService()
+        reranker = BedrockCohereReranker()
+        llm_client = BedrockLLMClient()
+    else:
+        print("💻 Running in LOCAL mode (Ollama + PyTorch)")
+        embedding_service = EmbeddingService()
+        reranking_service = RerankingService()
+        reranker = CrossEncoderReranker(reranking_service)
+        llm_client = OllamaClient()
+
     document_store = DocumentStore(embedding_service, user_email)
 
     semantic_search = SemanticSearch(embedding_service, document_store)
@@ -44,11 +62,7 @@ def startup(user_email: str = "default") -> Application:
     rank_fusion = ReciprocalRankFusion()
     hybrid_search = HybridSearch(semantic_search, keyword_search, rank_fusion)
 
-    reranking_service = RerankingService()
-    reranker = CrossEncoderReranker(reranking_service)
-
-    ollama_client = OllamaClient()
-    llm_service = LLMService(ollama_client)
+    llm_service = LLMService(llm_client)
     answer_generator = AnswerGenerator(llm_service)
 
     conversation_formatter = ConversationFormatter()
