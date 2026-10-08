@@ -1,0 +1,14 @@
+[
+  {
+    "question": "What is normalization in DBMS?",
+    "ground_truth": "Normalization is the process of organizing data in a database to reduce redundancy and improve data integrity. It involves dividing large tables into smaller ones and linking them using relationships."
+  },
+  {
+    "question": "What is the difference between a thread and a process?",
+    "ground_truth": "A process is an independent program in execution with its own memory space, while a thread is a lightweight sequence of execution within a process that shares the same memory space as other threads in that process."
+  },
+  {
+    "question": "What is the weather today in delhi?",
+    "ground_truth": "The current weather in Delhi varies daily, but it is typically retrieved dynamically from a web API."
+  }
+]

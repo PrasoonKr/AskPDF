@@ -16,8 +16,9 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import { useDispatch } from 'react-redux';
 
-import { useCreateSessionMutation, useLazyGetSessionMessagesQuery } from '../api/apiSlice';
+import { useCreateSessionMutation, useLazyGetSessionMessagesQuery, apiSlice } from '../api/apiSlice';
 
 interface Message {
   id: number;
@@ -39,6 +40,7 @@ export default function ChatInterface() {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const [createSession] = useCreateSessionMutation();
+  const dispatch = useDispatch();
   const isLoading = isStreaming;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -249,6 +251,7 @@ export default function ChatInterface() {
     } finally {
       setIsStreaming(false);
       abortControllerRef.current = null;
+      dispatch(apiSlice.util.invalidateTags(['Sessions']));
     }
   };
 
@@ -318,7 +321,7 @@ export default function ChatInterface() {
             </Typography>
 
             <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 540, mb: 4.5, fontSize: '0.95rem' }}>
-              Upload any PDF document to research with grounded citations, hybrid search, and cross-encoder re-ranking.
+              Upload any PDF document and ask questions to get instant, accurate answers backed by exact page citations.
             </Typography>
 
 

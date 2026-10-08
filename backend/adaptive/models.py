@@ -7,6 +7,7 @@ class RouteType(str, Enum):
     SIMPLE_RAG = "simple_rag"
     MULTI_QUERY_RAG = "multi_query_rag"
     WEB_SEARCH = "web_search"
+    GREETING = "greeting"
 
 
 @dataclass

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 from starlette.responses import StreamingResponse
 from sqlalchemy.orm import Session as DBSession
 import asyncio
@@ -31,6 +31,9 @@ async def chat(
     current_user=Depends(get_current_user),
     db: DBSession = Depends(get_db),
 ):
+    if not chat_request.question or not chat_request.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty")
+
     cancel_flag = {"is_cancelled": False}
 
     async def check_disconnect():
@@ -76,6 +79,9 @@ async def chat_stream(
     current_user=Depends(get_current_user),
     db: DBSession = Depends(get_db),
 ):
+    if not chat_request.question or not chat_request.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty")
+
     cancel_flag = {"is_cancelled": False}
 
     # Save user message to DB

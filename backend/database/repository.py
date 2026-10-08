@@ -116,15 +116,20 @@ def create_document_record(
     db.refresh(doc)
     return doc
 
+def get_user_documents(db: Session, user_id: str) -> list[Document]:
+    return db.query(Document).filter(Document.user_id == user_id).order_by(Document.uploaded_at.desc()).all()
+
+
 
 def delete_document_record(db: Session, user_id: str, filename: str) -> bool:
-    doc = (
+    docs = (
         db.query(Document)
         .filter(Document.user_id == user_id, Document.filename == filename)
-        .first()
+        .all()
     )
-    if doc:
-        db.delete(doc)
+    if docs:
+        for doc in docs:
+            db.delete(doc)
         db.commit()
         return True
     return False

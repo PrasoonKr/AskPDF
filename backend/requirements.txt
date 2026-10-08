@@ -12,3 +12,5 @@ ollama==0.6.2
 SQLAlchemy==2.1.3
 python-multipart
 psycopg[binary]
+boto3==1.43.109
+duckduckgo-search==6.2.12

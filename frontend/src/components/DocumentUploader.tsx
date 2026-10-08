@@ -34,7 +34,7 @@ export default function DocumentUploader() {
       const res = await uploadDocument(formData).unwrap();
       Toast.fire({
         icon: 'success',
-        title: `Indexed ${res.chunks} chunks from ${res.documents} PDF document(s).`,
+        title: `Successfully processed ${res.documents} PDF document(s)!`,
       });
     } catch (err: any) {
       Toast.fire({
@@ -99,7 +99,7 @@ export default function DocumentUploader() {
           <Box sx={{ py: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.2 }}>
             <CircularProgress size={28} sx={{ color: '#ec4899' }} />
             <Typography variant="caption" sx={{ color: '#a5b4fc', fontWeight: 600 }}>
-              Parsing & Embedding Chunks...
+              Analyzing Document...
             </Typography>
           </Box>
         ) : (

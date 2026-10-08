@@ -19,6 +19,10 @@ class AdaptiveRouter:
         r"\b(outside knowledge|search the web|google it|internet)\b",
     ]
 
+    GREETING_INDICATORS = [
+        r"^(hi|hello|hey|how are you|good morning|good evening|good afternoon|what'?s up|sup|greetings)\b",
+    ]
+
     COMPLEX_INDICATORS = [
         r"\b(compare|comparison|versus|vs\.?|difference between|pros and cons|trade-offs)\b",
         r"\b(and how does (it|that) (affect|impact|influence|relate))\b",
@@ -30,6 +34,16 @@ class AdaptiveRouter:
 
     def route(self, query: str) -> RouteDecision:
         cleaned_query = query.strip()
+
+        # 0. Fast Pattern Check for Greetings
+        for pattern in self.GREETING_INDICATORS:
+            if re.search(pattern, cleaned_query, re.IGNORECASE):
+                return RouteDecision(
+                    route=RouteType.GREETING,
+                    confidence=0.99,
+                    reasoning=f"Query matched simple greeting.",
+                    sub_queries=[cleaned_query],
+                )
 
         # 1. Fast Pattern Check for Outside Knowledge / Web Search
         for pattern in self.WEB_SEARCH_INDICATORS:

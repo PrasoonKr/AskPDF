@@ -68,8 +68,20 @@ class AdaptiveRAGPipeline:
         # -------------------------------------------------------------
         # STEP 1: Query Analysis & Routing
         # -------------------------------------------------------------
+        from backend.config import RetrievalConfig
+        if RetrievalConfig.ENABLE_QUERY_REWRITING and getattr(self.retrieval_pipeline, "query_rewriter", None) and (recent_turns or summary):
+            current_query = self.retrieval_pipeline.query_rewriter.rewrite(
+                query=query,
+                recent_turns=recent_turns,
+                summary=summary,
+            )
+            if current_query != query:
+                print(f"  📝 [Query Rewriter] Resolved Coreferences: \"{current_query}\"", flush=True)
+        else:
+            current_query = query
+
         t_route_start = time.time()
-        decision: RouteDecision = self.router.route(query)
+        decision: RouteDecision = self.router.route(current_query)
         route_time = time.time() - t_route_start
 
         print(f"\n  🔀 [Step 1: Router] -> {decision.route.value.upper()} (Confidence: {decision.confidence:.2f}, Latency: {route_time*1000:.1f}ms)", flush=True)
@@ -91,10 +103,33 @@ class AdaptiveRAGPipeline:
         step_idx += 1
 
         # -------------------------------------------------------------
+        # BRANCH: Greeting Bypass
+        # -------------------------------------------------------------
+        if decision.route == RouteType.GREETING:
+            print(f"  👋 [Step 2: Greeting] Bypassing retrieval entirely.", flush=True)
+            trace_steps.append(
+                AdaptiveStepTrace(
+                    step_number=step_idx,
+                    step_type="greeting_bypass",
+                    query_used=query,
+                    decision_or_grade="skipped_retrieval",
+                )
+            )
+            print("=" * 65 + "\n", flush=True)
+            return AdaptiveRAGResult(
+                route_chosen=RouteType.GREETING,
+                total_attempts=1,
+                is_relevant=True,
+                documents=[],
+                context_text="",
+                trace=trace_steps,
+            )
+
+        # -------------------------------------------------------------
         # BRANCH: Web Search (Outside Knowledge)
         # -------------------------------------------------------------
         if decision.route == RouteType.WEB_SEARCH:
-            print(f"  🌐 [Step 2: External Web Search] Querying DuckDuckGo...", flush=True)
+            print(f"  🌐 [Step 2: External Web Search] Querying External APIs...", flush=True)
             t_web_start = time.time()
             web_results = self.web_search.search(query)
             web_time = time.time() - t_web_start
@@ -109,7 +144,7 @@ class AdaptiveRAGPipeline:
                 AdaptiveStepTrace(
                     step_number=step_idx,
                     step_type="web_search",
-                    query_used=query,
+                    query_used=current_query,
                     decision_or_grade="retrieved_from_web",
                     details={"results_count": len(web_results)},
                 )
@@ -125,10 +160,6 @@ class AdaptiveRAGPipeline:
             )
 
         # -------------------------------------------------------------
-        # BRANCH: Document Retrieval (Simple RAG or Multi-Query RAG)
-        # with Relevance Grading & Self-Correction Loop
-        # -------------------------------------------------------------
-        current_query = query
         attempt = 1
         final_docs = []
         is_relevant = False
@@ -156,7 +187,7 @@ class AdaptiveRAGPipeline:
                     fused_candidates = []
 
                 # Single-pass CrossEncoder rerank on the fused candidate pool
-                retrieved_docs = self.retrieval_pipeline.reranker.rerank(query, fused_candidates)
+                retrieved_docs = self.retrieval_pipeline.reranker.rerank(current_query, fused_candidates)
                 ret_time = time.time() - t_retrieval_start
                 top_doc = retrieved_docs[0] if retrieved_docs else None
                 top_name = getattr(getattr(getattr(top_doc, "document", None), "source", None), "filename", "None")
@@ -178,7 +209,7 @@ class AdaptiveRAGPipeline:
 
             # 2. Relevance Grading
             t_grade_start = time.time()
-            grade: GradeResult = self.grader.grade(query, retrieved_docs)
+            grade: GradeResult = self.grader.grade(current_query, retrieved_docs)
             grade_time = time.time() - t_grade_start
 
             grade_icon = "✅" if grade.is_relevant else "❌"
@@ -210,7 +241,7 @@ class AdaptiveRAGPipeline:
                 if attempt < self.max_retries:
                     print(f"  🔄 [Self-Correction Loop] Triggering Query Reformulation for Attempt {attempt+1}...", flush=True)
                     new_query = self.rewriter.rewrite_failed_query(
-                        original_query=query,
+                        original_query=current_query,
                         critique=grade.reasoning,
                         missing_aspects=grade.missing_aspects,
                         attempt_number=attempt,
@@ -224,7 +255,7 @@ class AdaptiveRAGPipeline:
                             query_used=current_query,
                             decision_or_grade=f"rewritten_to: {new_query}",
                             details={
-                                "original": query,
+                                "original": current_query,
                                 "rewritten": new_query,
                                 "missing_targeted": grade.missing_aspects,
                             },

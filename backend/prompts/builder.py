@@ -10,6 +10,7 @@ def build_prompt(
     """
     Build the final RAG prompt.
     """
+    instruction = "Answer the question based ONLY on the provided Context." if context.strip() else "Respond to the user naturally."
 
     return (
         f"Context:\n"
@@ -20,5 +21,5 @@ def build_prompt(
         f"{conversation or 'No previous conversation.'}\n\n"
         f"Question:\n"
         f"{query}\n\n"
-        f"Answer the question based ONLY on the provided Context."
+        f"{instruction}"
     )
