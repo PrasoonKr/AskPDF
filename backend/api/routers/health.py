@@ -1,6 +1,9 @@
 from datetime import datetime
 from fastapi import APIRouter
-import ollama
+try:
+    import ollama
+except ImportError:
+    ollama = None
 
 from backend.config import EmbeddingConfig, LLMConfig, RerankerConfig, ChunkerConfig, RetrievalConfig
 
@@ -20,11 +23,15 @@ def health():
     overall_status = "healthy"
     
     try:
-        res = ollama.list()
-        if hasattr(res, "models"):
-            ollama_info["models"] = [getattr(m, "model", getattr(m, "name", str(m))) for m in res.models]
-        elif isinstance(res, dict):
-            ollama_info["models"] = [m.get("name") or m.get("model") for m in res.get("models", [])]
+        if ollama:
+            res = ollama.list()
+            if hasattr(res, "models"):
+                ollama_info["models"] = [getattr(m, "model", getattr(m, "name", str(m))) for m in res.models]
+            elif isinstance(res, dict):
+                ollama_info["models"] = [m.get("name") or m.get("model") for m in res.get("models", [])]
+        else:
+            ollama_info = {"status": "disabled", "error": "Not installed in production"}
+            overall_status = "healthy" # It's expected in prod
     except Exception as e:
         ollama_info = {
             "status": "disconnected",
@@ -58,8 +65,24 @@ def readiness():
     Returns 503 if any critical component is not ready.
     """
     from fastapi.responses import JSONResponse
+    import os
+    env = os.getenv("RAG_ENVIRONMENT", "local").lower()
+    
     checks = {}
     all_ready = True
+
+    if env == "production":
+        checks["embedding_model"] = "cloud_api"
+        checks["reranker"] = "cloud_api"
+        checks["ollama"] = "cloud_api"
+        return JSONResponse(
+            status_code=200,
+            content={
+                "ready": True,
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "checks": checks,
+            }
+        )
 
     # Check embedding model
     try:
@@ -87,18 +110,21 @@ def readiness():
 
     # Check Ollama connectivity
     try:
-        res = ollama.list()
-        model_names = []
-        if hasattr(res, "models"):
-            model_names = [getattr(m, "model", getattr(m, "name", str(m))) for m in res.models]
-        elif isinstance(res, dict):
-            model_names = [m.get("name") or m.get("model") for m in res.get("models", [])]
-        
-        if any(LLMConfig.MODEL in name for name in model_names):
-            checks["ollama"] = "ready"
+        if ollama:
+            res = ollama.list()
+            model_names = []
+            if hasattr(res, "models"):
+                model_names = [getattr(m, "model", getattr(m, "name", str(m))) for m in res.models]
+            elif isinstance(res, dict):
+                model_names = [m.get("name") or m.get("model") for m in res.get("models", [])]
+            
+            if any(LLMConfig.MODEL in name for name in model_names):
+                checks["ollama"] = "ready"
+            else:
+                checks["ollama"] = f"model {LLMConfig.MODEL} not found"
+                all_ready = False
         else:
-            checks["ollama"] = f"model {LLMConfig.MODEL} not found"
-            all_ready = False
+            checks["ollama"] = "disabled_in_prod"
     except Exception as e:
         checks["ollama"] = f"error: {e}"
         all_ready = False

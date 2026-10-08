@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from backend.database.session import get_db
 from backend.database import repository as repo
 
-load_dotenv("backend/.env")
+load_dotenv("backend/.env", override=True)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

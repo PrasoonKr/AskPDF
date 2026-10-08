@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 from dotenv import load_dotenv
 
-load_dotenv("backend/.env")
+load_dotenv("backend/.env", override=True)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///backend/askpdf.db")
 
