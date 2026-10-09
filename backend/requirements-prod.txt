@@ -13,4 +13,5 @@ psycopg[binary]
 boto3==1.43.109
 duckduckgo-search==6.2.12
 cohere==5.11.0
-openai==1.50.0
+openai==1.109.1
+httpx==0.27.2
