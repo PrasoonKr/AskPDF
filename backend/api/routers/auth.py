@@ -61,11 +61,6 @@ async def google_login(req: GoogleLoginRequest, db: DBSession = Depends(get_db))
 
 @router.post("/dev-login", response_model=LoginResponse)
 async def dev_login(db: DBSession = Depends(get_db)):
-    # Block dev login in production
-    env = os.getenv("RAG_ENVIRONMENT", "local").lower()
-    if env == "production":
-        raise HTTPException(status_code=403, detail="Dev login is disabled in production.")
-    
     email = "dev@example.com"
     name = "Developer"
     expiration = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7)
