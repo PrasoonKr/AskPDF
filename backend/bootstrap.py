@@ -18,7 +18,7 @@ from backend.query.llm_rewriter import LLMRewriter
 from backend.query.rule_based import RuleBasedRewriter
 from backend.prompts.context_builder import ContextBuilder
 from backend.retrieval.retrieval_pipeline import RetrievalPipeline
-from backend.reranking.service import RerankingService
+
 from backend.reranking.cohere_reranker import NativeCohereReranker
 from backend.retrieval.semantic_search import SemanticSearch
 from backend.retrieval.keyword_search import KeywordSearch
@@ -52,6 +52,8 @@ def startup(user_email: str = "default") -> Application:
         from backend.embeddings.service import EmbeddingService
         from backend.reranking.cross_encoder import CrossEncoderReranker
         from backend.llm.client import OllamaClient
+        
+        from backend.reranking.service import RerankingService
         
         embedding_service = EmbeddingService()
         reranking_service = RerankingService()
