@@ -23,7 +23,7 @@ class NativeCohereReranker:
                 doc_texts.append(doc.get("content", ""))
             else:
                 doc_obj = getattr(doc, "document", doc)
-                doc_texts.append(getattr(doc_obj, "page_content", str(doc)))
+                doc_texts.append(getattr(doc_obj, "text", str(doc)))
 
         try:
             response = self.client.rerank(
