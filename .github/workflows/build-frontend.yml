@@ -3,12 +3,14 @@ name: Build and Auto-Commit Frontend
 on:
   push:
     branches:
-      - main
+      - production
     paths:
       # Only trigger if frontend code changes
       - 'frontend/src/**'
       - 'frontend/public/**'
       - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+      - 'frontend/tsconfig*.json'
       - 'frontend/vite.config.ts'
 
 jobs:
