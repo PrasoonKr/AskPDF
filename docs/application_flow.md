@@ -23,7 +23,7 @@ The AskPDF system is partitioned into five distinct layers:
 2. **API & Security Gateway:** FastAPI async server with Google OAuth 2.0 validation and JWT verification.
 3. **Multi-Tenant Application Registry:** Per-user dependency injection holding isolated `DocumentStore`, `KeywordSearch`, and `VectorIndex` instances.
 4. **Retrieval & Fusion Engine:** Dense FAISS vector search, sparse BM25 keyword matching, Reciprocal Rank Fusion (RRF), and Cross-Encoder re-ranking.
-5. **Local Inference Layer:** Ollama serving quantized open-weights models (`qwen2.5:3b`).
+5. **Inference Layer:** Ollama for local development (`qwen2.5:3b`), or AWS Bedrock (`gpt-oss-120b`) and Cohere APIs for production.
 
 ```
  +-----------------------------------------------------------------------------------------+
@@ -54,7 +54,7 @@ The AskPDF system is partitioned into five distinct layers:
  | 4. Sparse Token Indexing    |                      | 4. Reciprocal Rank Fusion (RRF)    |
  | 5. Disk Persistence (.pkl)  |                      | 5. Cross-Encoder Re-ranker (BGE)   |
  +-----------------------------+                      | 6. Context Builder & Grounding     |
-                                                      | 7. Local LLM Generator (Ollama)    |
+                                                      | 7. LLM Generator (Ollama / AWS Bedrock) |
                                                       | 8. Citation Fallback & Trace Format|
                                                       +------------------------------------+
 ```
@@ -77,7 +77,7 @@ sequenceDiagram
     participant Sparse as BM25 (Sparse Search)
     participant RRF as Rank Fusion (RRF)
     participant Rerank as Cross-Encoder Reranker
-    participant Gen as LLM Generator (Ollama)
+    participant Gen as LLM Generator (AWS/Ollama)
 
     User->>UI: Submit Question ("What is the CAP theorem?")
     UI->>API: POST /chat { session_id, question } [Bearer Token]
@@ -332,5 +332,5 @@ Final Rewritten Search Query: "what are the main limitations of the raft consens
 | **Rank Fusion** | Reciprocal Rank Fusion (RRF) | Smoothing constant $k = 60$ |
 | **Reranker** | `BAAI/bge-reranker-base` | Cross-Encoder, Top-5 selection |
 | **Chunking** | Custom Slotted Chunker | 400 words/chunk, 75 words overlap |
-| **LLM Inference** | Ollama (`qwen2.5:3b`) | Local inference, Temperature 0.2 |
+| **LLM Inference** | AWS Bedrock / Ollama | Production utilizes AWS Bedrock proxy; Local utilizes Ollama. |
 | **Authentication** | Google OAuth 2.0 + PyJWT | 7-day expiration, HS256 algorithm |

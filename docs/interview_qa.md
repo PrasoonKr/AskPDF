@@ -22,7 +22,7 @@ This guide contains the most common and challenging technical, architectural, an
 > **Answer:**
 > **AskPDF** is a local-first, privacy-focused AI Research Assistant powered by an advanced Retrieval-Augmented Generation (RAG) architecture. It allows users to upload complex research papers and PDFs and converse with them with zero hallucinations. 
 > 
-> Unlike naive RAG pipelines that only use basic vector search, AskPDF implements an advanced **Hybrid Retrieval Pipeline** combining dense semantic search (FAISS) and sparse keyword search (BM25), fused via **Reciprocal Rank Fusion (RRF)**, and refined with a **Cross-Encoder Re-ranker**. The backend is built with FastAPI and local LLM inference via Ollama, while the frontend is built with React, TypeScript, and Redux Toolkit Query, protected by Google OAuth and custom JWT authentication.
+> Unlike naive RAG pipelines that only use basic vector search, AskPDF implements an advanced **Hybrid Retrieval Pipeline** combining dense semantic search (FAISS) and sparse keyword search (BM25), fused via **Reciprocal Rank Fusion (RRF)**, and refined with a **Cross-Encoder Re-ranker**. The backend is built with FastAPI and LLM inference via Ollama/AWS Bedrock, while the frontend is built with React, TypeScript, and Redux Toolkit Query, protected by Google OAuth and custom JWT authentication.
 
 ---
 
@@ -37,7 +37,7 @@ This guide contains the most common and challenging technical, architectural, an
 > 5. **Reciprocal Rank Fusion (RRF):** The dense and sparse rank lists are merged using the RRF algorithm ($Score(d) = \sum \frac{1}{k + r(d)}$) to generate a balanced top-10 candidate pool.
 > 6. **Cross-Encoder Re-ranking:** A cross-encoder model (`BAAI/bge-reranker-base`) scores the full (query, document) pairs to re-order the candidates by deep contextual relevance, selecting the top-5 chunks.
 > 7. **Context Construction & Prompt Injection:** Top-scoring chunks above the similarity threshold are structured into a grounded context block.
-> 8. **Inference:** A local LLM (e.g., `qwen2.5:3b` via Ollama) generates the response conditioned strictly on the retrieved context using a separated `{"role": "system"}` directive.
+> 8. **Inference:** An LLM (e.g., `gpt-oss-120b` via AWS Bedrock or `qwen2.5:3b` via Ollama) generates the response conditioned strictly on the retrieved context using a separated `{"role": "system"}` directive.
 > 9. **Citation & Trace Delivery:** The backend formats source chips (filename + page numbers) and a full retrieval trace, returning the payload to the frontend.
 
 ---
@@ -123,7 +123,7 @@ This guide contains the most common and challenging technical, architectural, an
 > **Answer:**
 > We segregated the codebase into distinct layers:
 > - **Domain Models (`backend/models/`):** Pure Python dataclasses (`Document`, `Page`, `SearchResult`, `SourceDocument`) that encapsulate core business entities and enforce type integrity across the system.
-> - **Infrastructure / Adapters (`backend/retrieval/`, `backend/embeddings/`, `backend/llm/`):** Implementations for FAISS, BM25, SentenceTransformers, and Ollama client.
+> - **Infrastructure / Adapters (`backend/retrieval/`, `backend/embeddings/`, `backend/llm/`):** Implementations for FAISS, BM25, SentenceTransformers/Cohere, and Ollama/OpenAI client.
 > - **Services / Orchestrators (`backend/services/`):** `ResearchAssistantService` and `IngestionPipeline` coordinate domain logic without being coupled to HTTP frameworks.
 > - **API / Presentation Layer (`backend/api/`):** FastAPI routers, Pydantic schemas, and security dependencies.
 

@@ -100,9 +100,9 @@ User Question -> Query Rewriter (LLM) -> [Dense FAISS + Sparse BM25] -> Reciproc
 2. **Prompt Builder (`builder.py`) & Template (`templates.py`)**:
    - Strictly separates system instructions into a native `{"role": "system"}` message sent to the local LLM.
    - Prevents small-model context decay by placing an explicit grounding constraint at the bottom of the prompt.
-3. **Local LLM Generator (`OllamaClient`)**:
+3. **LLM Generator (`OllamaClient` / `OpenAILLMClient`)**:
    - Default Model: **`qwen2.5:3b`** (or `llama3.2:3b`).
-   - Runs locally via Ollama with `temperature = 0.2` for deterministic, hallucination-free generation.
+   - Runs locally via Ollama with `temperature = 0.2` for deterministic generation, or uses AWS Bedrock in production.
 4. **Citation Extraction & Fallback**:
    - Automatically detects inline citations (e.g., `[system_design.pdf, Page 17]`).
    - If the LLM omits explicit citation formatting, the backend automatically falls back to attributing all high-confidence context documents passed to the prompt.
@@ -133,7 +133,7 @@ User Question -> Query Rewriter (LLM) -> [Dense FAISS + Sparse BM25] -> Reciproc
 - `DELETE /documents`: Clears the user's entire knowledge base.
 - `POST /sessions`: Creates an isolated chat session.
 - `POST /chat`: Submits questions and returns generated answers with source chips and retrieval trace logs.
-- `GET /health`: Diagnostic health check reporting Ollama connectivity, available local models, active configurations, and system uptime.
+- `GET /health`: Diagnostic health check reporting LLM connectivity, available local models, active configurations, and system uptime.
 
 ### React + TypeScript Frontend (`frontend/`):
 - **Redux Toolkit Query (`apiSlice.ts`)**: Manages caching, optimistic updates, tag invalidation (`['Documents']`), and memory resets on logout.
