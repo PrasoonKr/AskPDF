@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./frontend
-        run: npm ci || npm install
+        run: npm ci
 
       - name: Build React App
         working-directory: ./frontend
