@@ -58,9 +58,9 @@ For complete architectural details, sequence diagrams, and lifecycle specificati
 | **Frontend** | React 18, TypeScript, Vite, Material UI (MUI), Redux Toolkit (RTK Query), React Router, React Markdown |
 | **Backend** | Python 3.10+, FastAPI, Uvicorn, PyPDF / PyMuPDF (`fitz`), Pydantic |
 | **Vector DB & Search** | FAISS (`IndexFlatIP`), `rank_bm25` (BM25Okapi), Reciprocal Rank Fusion |
-| **Embedding Model** | `BAAI/bge-small-en-v1.5` (384 dimensions, normalized L2) |
-| **Reranker Model** | `BAAI/bge-reranker-base` (Cross-Encoder) |
-| **LLM Inference** | Ollama (`qwen2.5:3b` / `llama3.2:3b`) |
+| **Embedding Model** | Local: `BAAI/bge-small-en-v1.5` <br> Prod: Cohere Embeddings |
+| **Reranker Model** | Local: `BAAI/bge-reranker-base` <br> Prod: Cohere Rerank |
+| **LLM Inference** | Local: Ollama (`qwen2.5:3b`) <br> Prod: AWS Bedrock via OpenAI Proxy (`openai.gpt-oss-120b`) |
 | **Auth & Security** | Google OAuth 2.0 (`google-auth`), PyJWT (HS256) |
 
 ---
@@ -127,6 +127,13 @@ Populate `backend/.env`:
 ```env
 GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
 JWT_SECRET=your_super_secret_jwt_key_for_ai_research_assistant
+COHERE_API_KEY=your_cohere_api_key
+OPENAI_API_KEY=your_aws_bedrock_bearer_token
+OPENAI_BASE_URL=https://bedrock-mantle.ap-south-1.api.aws/v1
+AWS_ACCESS_KEY_ID=your_aws_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret
+AWS_REGION=ap-south-1
+S3_BUCKET_NAME=your-bucket-name
 ```
 
 **Frontend Configuration (`frontend/.env`):**
@@ -151,8 +158,11 @@ python -m venv .venv
 # Linux/macOS:
 source .venv/bin/activate
 
-# 2. Install dependencies
-pip install -r requirements.txt
+# 2. Install dependencies (Local Development)
+pip install -r backend/requirements.txt
+
+# Or for Production (Excludes Torch/Ollama):
+pip install -r backend/requirements-prod.txt
 ```
 
 ---
@@ -168,13 +178,17 @@ npm install
 
 ## Running the Application
 
-### Option A: Production Mode (Single Server)
-Build the frontend and serve everything from FastAPI:
+### Option A: Production Mode (AWS EC2)
+Build the frontend and serve everything from FastAPI utilizing Cloud APIs:
 ```bash
 # Build React frontend
 cd frontend && npm run build && cd ..
 
-# Start the server (serves both API and React UI)
+# Start the server (serves both API and React UI in production mode)
+# Windows:
+$env:RAG_ENVIRONMENT="production"; uvicorn backend.api.app:app --host 0.0.0.0 --port 8000
+# Linux/macOS:
+export RAG_ENVIRONMENT="production"
 uvicorn backend.api.app:app --host 0.0.0.0 --port 8000
 ```
 - Application: `http://localhost:8000`
