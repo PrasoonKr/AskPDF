@@ -99,6 +99,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Rate limiting: protect expensive LLM/embedding endpoints from abuse
+from backend.api.middleware.rate_limiter import RateLimitMiddleware
+app.add_middleware(
+    RateLimitMiddleware,
+    chat_limit=20,       # 20 chat requests per minute per IP
+    upload_limit=10,     # 10 uploads per minute per IP
+    general_limit=60,    # 60 general API requests per minute per IP
+    window_seconds=60,
+)
+
 # All API routes under /api prefix
 api_router = APIRouter(prefix="/api")
 api_router.include_router(health.router)
