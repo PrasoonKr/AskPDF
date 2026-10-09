@@ -16,7 +16,7 @@ class AdaptiveRouter:
     WEB_SEARCH_INDICATORS = [
         r"\b(today|yesterday|tomorrow|current|latest|recent news|weather|stock price|election|who is the president)\b",
         r"\b(live score|cricket match|olympics|fifa|world cup|movie release|bitcoin price)\b",
-        r"\b(outside knowledge|search the web|google it|internet)\b",
+        r"\b(outside knowledge|search the web|google it|internet|web search|search online|look it up|do a web search)\b",
     ]
 
     GREETING_INDICATORS = [

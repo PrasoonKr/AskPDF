@@ -121,3 +121,4 @@ if _frontend_dist.exists():
         if file_path.is_file():
             return FileResponse(file_path)
         return FileResponse(_frontend_dist / "index.html")
+

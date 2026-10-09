@@ -116,13 +116,45 @@ class RelevanceGrader:
                 filtered_documents=retrieved_docs,
             )
 
-        # 3. Ambiguous zone: score between 0.10–0.20 with some keyword overlap
-        # Use heuristic instead of LLM (which costs ~6s on CPU)
+        # 3. Ambiguous zone: score between 0.10-0.20 with some keyword overlap
+        # Use LLM to verify if available and fast enough (e.g. AWS Bedrock), otherwise fallback to heuristic
         if keyword_overlap_ratio >= 0.20 and top_score >= 0.10:
+            if self.llm_service:
+                import os
+                if os.getenv("RAG_ENVIRONMENT", "local").lower() == "production":
+                    prompt = (
+                        f"You are a strict grading assistant.\n"
+                        f"Evaluate if the following context contains ANY relevant information to answer the question.\n"
+                        f"Question: {query}\n"
+                        f"Context: {combined_text}\n"
+                        f"Reply with exactly 'YES' if it is relevant, or 'NO' if it is completely irrelevant."
+                    )
+                    try:
+                        llm_response = self.llm_service.generate(prompt).strip().upper()
+                        if "YES" in llm_response:
+                            return GradeResult(
+                                is_relevant=True,
+                                confidence=0.85,
+                                reasoning="Borderline match verified as RELEVANT by LLM.",
+                                missing_aspects=[],
+                                filtered_documents=retrieved_docs,
+                            )
+                        elif "NO" in llm_response:
+                            missing = [kw for kw in query_keywords if kw not in matched_keywords]
+                            return GradeResult(
+                                is_relevant=False,
+                                confidence=0.85,
+                                reasoning="Borderline match rejected as IRRELEVANT by LLM.",
+                                missing_aspects=missing if missing else [query],
+                                filtered_documents=[],
+                            )
+                    except Exception:
+                        pass # Fallback to heuristic
+            
             return GradeResult(
                 is_relevant=True,
                 confidence=0.75,
-                reasoning=f"Borderline match accepted via heuristic (top_score={top_score:.3f}, keyword overlap={keyword_overlap_ratio*100:.0f}%). LLM verification skipped for latency.",
+                reasoning=f"Borderline match accepted via heuristic (top_score={top_score:.3f}, keyword overlap={keyword_overlap_ratio*100:.0f}%).",
                 missing_aspects=[],
                 filtered_documents=retrieved_docs,
             )
