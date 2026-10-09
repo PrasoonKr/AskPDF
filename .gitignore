@@ -1,4 +1,6 @@
 .venv
+venv/
+backend/venv/
 __pycache__/
 *.pyc
 .env
@@ -12,4 +14,4 @@ backend/storage/*.pkl
 backend/storage/*.index
 *.pkl
 *.index
-*.db
+*.db
