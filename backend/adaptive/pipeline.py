@@ -280,7 +280,7 @@ class AdaptiveRAGPipeline:
         context_blocks = []
         for d in final_docs[:top_k]:
             doc_obj = getattr(d, "document", d)
-            text = getattr(doc_obj, "text", str(d))[:400]
+            text = getattr(doc_obj, "text", str(d))
             meta_src = getattr(getattr(doc_obj, "source", None), "filename", "Document")
             meta_page = getattr(doc_obj, "page", None)
             loc = f"{meta_src}, Page {meta_page}" if meta_page is not None else meta_src
