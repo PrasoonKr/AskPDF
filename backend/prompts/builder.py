@@ -10,7 +10,7 @@ def build_prompt(
     """
     Build the final RAG prompt.
     """
-    instruction = "Answer the question based ONLY on the provided Context." if context.strip() else "Respond to the user naturally."
+    instruction = "Answer the user's question using ONLY the provided Context. If the context does not contain the answer, say 'I cannot answer this question based on the provided documents.'" if context.strip() else "There is no context provided. Refuse to answer any factual questions."
 
     return (
         f"Context:\n"
