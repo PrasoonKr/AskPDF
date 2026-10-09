@@ -37,6 +37,7 @@ async def upload_documents(
     
     total_chunks = 0
     s3_service = S3Service()
+    MAX_PDF_SIZE_MB = 25
     
     with SessionLocal() as db:
         user = repository.get_or_create_user(db, user_email)
@@ -44,6 +45,13 @@ async def upload_documents(
         for file in files:
             if not file.filename.lower().endswith('.pdf'):
                 raise HTTPException(status_code=400, detail=f"File {file.filename} is not a PDF document.")
+            
+            # Read content first to check size
+            content = await file.read()
+            if not content:
+                raise HTTPException(status_code=400, detail=f"File {file.filename} is empty.")
+            if len(content) > MAX_PDF_SIZE_MB * 1024 * 1024:
+                raise HTTPException(status_code=413, detail=f"File {file.filename} exceeds {MAX_PDF_SIZE_MB}MB limit.")
             
             # Idempotency check: if document already exists, delete old records, chunks, and FAISS
             existing_doc = repository.get_user_documents(db, user.id)
@@ -57,9 +65,6 @@ async def upload_documents(
             # 1. Save temporarily
             file_path = documents_dir / file.filename
             with open(file_path, "wb") as f:
-                content = await file.read()
-                if not content:
-                    raise HTTPException(status_code=400, detail=f"File {file.filename} is empty.")
                 f.write(content)
                 
             # 2. Ingest into FAISS & DB chunks

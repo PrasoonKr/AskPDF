@@ -35,12 +35,19 @@ class CohereEmbeddingService:
             else:
                 texts.append(str(doc))
 
-        response = self.client.embed(
-            texts=texts, 
-            model=self.model, 
-            input_type="search_document"
-        )
         import numpy as np
-        emb = np.array(response.embeddings, dtype=np.float32)
+        # Cohere API limits to 96 texts per call — batch accordingly
+        BATCH_SIZE = 96
+        all_embeddings = []
+        for i in range(0, len(texts), BATCH_SIZE):
+            batch = texts[i:i + BATCH_SIZE]
+            response = self.client.embed(
+                texts=batch,
+                model=self.model,
+                input_type="search_document"
+            )
+            all_embeddings.append(np.array(response.embeddings, dtype=np.float32))
+
+        emb = np.vstack(all_embeddings)
         emb /= np.linalg.norm(emb, axis=1, keepdims=True)
         return emb
